@@ -12,6 +12,8 @@ For example require to ecma takes the abstract syntax tree generated from this c
 
 ## usage
 
+Install it
+
 ```
     npm i javascript-compiling-tokenizer
 ```
@@ -19,4 +21,22 @@ For example require to ecma takes the abstract syntax tree generated from this c
 Import it
 
 ```
-    import 
+    import LexicalAnalyzer from 'javascript-compiling-tokenizer';
+```
+
+Initialize it
+
+``` 
+    const tokenizer = new LexicalAnalyzer(options)
+
+    //options only have one property.... 'verbose' [boolean]
+```
+
+Run it
+```
+    const syntaxTree = tokenizer().start(fileAsString);
+```
+
+## Coming soon
+
+documentation on the AST layout
