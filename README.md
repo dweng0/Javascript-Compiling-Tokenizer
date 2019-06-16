@@ -40,3 +40,17 @@ Run it
 ## Coming soon
 
 documentation on the AST layout
+
+The tokenizer will recurse in the following conditions:
+
+- if it finds an opening parenthesis ```(```
+- if it finds an opening code block ```{```
+- if it finds an opening array ```[```
+- if it finds a declaration ``` const, let, var new ```
+
+The code generate will consist of:
+
+```
+TODO
+
+```
