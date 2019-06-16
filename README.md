@@ -9,3 +9,14 @@ JCT does not worry about loading the files or what to do with the files after pu
 Other projects utilise this projects and take the resulting abstract syntax tree and transpire the JavaScript accordingly
 
 For example require to ecma takes the abstract syntax tree generated from this code and uses it to transpile code that contains the Old require import system into the new es6 import system
+
+## usage
+
+```
+    npm i javascript-compiling-tokenizer
+```
+
+Import it
+
+```
+    import 

@@ -6,7 +6,7 @@ const WHITESPACE = /\s/;
 const NUMBERS = /[0-9]/;
 const DECLARABLE_CHARACTERS = /[A-Za-z_.$]/i;
 
-export class LexicalAnalyzer {
+export default class LexicalAnalyzer {
     verbose: boolean = false;
     log(message: string) {
         if (this.verbose) {
