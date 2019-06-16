@@ -127,22 +127,11 @@ export default class LexicalAnalyzer {
                     case "const":
                     case "var":
                     case "let":
+                    case "new":
                         {
                             this.log(colors.yellow("entering " + char));
                             const results = this.start(input, current, ';');
                             tokens.push({ type: 'declaration', value: results.tokens });
-                            current = results.current;
-                            char = input[++current];
-                            break;
-                        }
-                    case "new":
-                    case "void":
-                    case "delete":
-                    case "in":
-                        {
-                            this.log(colors.yellow("entering " + char));
-                            const results = this.start(input, current, ';');
-                            tokens.push({ type: 'operator', value: results.tokens });
                             current = results.current;
                             char = input[++current];
                             break;
