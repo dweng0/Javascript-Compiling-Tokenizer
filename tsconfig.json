@@ -1,0 +1,24 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+      "alwaysStrict": true,
+      "outDir": "./dist",
+      "baseUrl": "ssrc",
+      "sourceMap": true,
+      "declaration": false,
+      "moduleResolution": "node",
+      "emitDecoratorMetadata": true,
+      "experimentalDecorators": true,
+      "allowJs": true,
+      "checkJs": true,
+      "target": "es5",
+       "lib": [
+        "es2016",
+        "dom"
+      ] 
+    },
+     "include":[
+        "src/**/*"
+      ]
+  }
+  
