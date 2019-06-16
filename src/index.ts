@@ -14,11 +14,22 @@ export default class LexicalAnalyzer {
         }
     }
     constructor(options) {
+        if(_.isEmpty(options))
+        {
+            throw new Error('No options have been provided');
+        }
+
         if (options.verbose) {
             this.verbose = true;
         }
     }
     start(input, current, exitOn) {
+
+        if(!input)
+        {
+            throw new Error('No Input string provided');
+        }
+
         current = current || 0;
         let tokens = [];
         let char = input[current];

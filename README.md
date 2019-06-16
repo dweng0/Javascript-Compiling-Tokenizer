@@ -1,8 +1,8 @@
 # Javascript Compiling Tokenizer
 
-Hello, welcome to JavaScript tokenizer 
+Hello, welcome to JavaScript tokenizer
 
-This project has the sole purpose of tokenizing JavaScript by traversing the files and generating an abstract syntax tree from the resulting tokenization process 
+This project has the sole purpose of tokenizing JavaScript by traversing the files and generating an abstract syntax tree from the resulting tokenization process
 
 JCT does not worry about loading the files or what to do with the files after pushing them into an abstract syntax tree it simply concerns itself with the process of generating an AST
 
@@ -26,7 +26,7 @@ Import it
 
 Initialize it
 
-``` 
+```
     const tokenizer = new LexicalAnalyzer(options)
 
     //options only have one property.... 'verbose' [boolean]
@@ -35,6 +35,11 @@ Initialize it
 Run it
 ```
     const syntaxTree = tokenizer().start(fileAsString);
+```
+
+Test it
+```
+    npm test
 ```
 
 ## Coming soon
