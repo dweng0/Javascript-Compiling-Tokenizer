@@ -24,12 +24,19 @@ describe('Lexer tests', () => {
             thirdPartyParsingTests: [(thing:string) => { return {type: 'a thing', value: 'another thing'}}]
         });
         expect(lex.thirdPartyParsingTests).to.be.an('Array');
-    } );
-
-    it('Should throw if a third party parser test does not return a token or false', () => {
-        const lex = lexer({
-            thirdPartyParserLogic: [() => {}]
-        });
-        expect(lex.start('test().java.script.thing();')).to.throw();
     });
+
+    it('Should throw if no input string is provided', () =>{
+        const test = () =>{
+            return lexer({verbose: true}).start('');
+        }
+        expect(test).to.throw();
+    });
+
+    it('Should return an object when succesfully finished', () => {
+        const test = () =>{
+            return lexer({verbose: false}).start('define');
+        }
+        expect(test()).to.be.an('object');
+    })
 }); 

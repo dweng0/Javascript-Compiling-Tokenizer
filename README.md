@@ -24,6 +24,12 @@ Install it
     npm i javascript-compiling-tokenizer
 ```
 
+link it
+
+```
+    npm link
+```
+
 Import it
 
 ```

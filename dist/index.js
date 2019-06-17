@@ -9,8 +9,16 @@ var DECLARABLE_CHARACTERS = /[A-Za-z_.$]/i;
 var LexicalAnalyzer = /** @class */ (function () {
     function LexicalAnalyzer(options) {
         this.verbose = false;
+        this.lineNumber = 0;
+        this.thirdPartyParsingTests = [];
+        if (_.isEmpty(options)) {
+            throw new Error('No options have been provided');
+        }
         if (options.verbose) {
             this.verbose = true;
+        }
+        if (options.thirdPartyParsingTests && options.thirdPartyParsingTests.length > 0) {
+            this.thirdPartyParsingTests = this.thirdPartyParsingTests.concat([options.thirdPartyParsingTests]);
         }
     }
     LexicalAnalyzer.prototype.log = function (message) {
@@ -19,8 +27,13 @@ var LexicalAnalyzer = /** @class */ (function () {
         }
     };
     LexicalAnalyzer.prototype.start = function (input, current, exitOn) {
+        var _this = this;
+        debugger;
+        if (!input) {
+            throw new Error('No Input string provided');
+        }
         current = current || 0;
-        var tokens = [];
+        var tokens = Array();
         var char = input[current];
         while (current < input.length) {
             char = input[current];
@@ -31,6 +44,24 @@ var LexicalAnalyzer = /** @class */ (function () {
                 }
                 break;
             }
+
+            if (!_.isEmpty(this.thirdPartyParsingTests)) {
+                var thirdPartyTokens = Array();
+                this.thirdPartyParsingTests.forEach(function (test) {
+                    var result = test(char, current, input);
+                    if (result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value)) {
+                        if (!result.currentCursorPosition) {
+                            throw new Error('Third party parsing function must return the new cursor position');
+                        }
+                        tokens.push(result.payload);
+                        current = result.currentCursorPosition;
+                    }
+                    else {
+                        _this.log('third party function returned no results, continuing');
+                    }
+                });
+            }
+
             //paren
             if (char === '(') {
                 this.log(colors.yellow("entering " + char));
@@ -61,8 +92,11 @@ var LexicalAnalyzer = /** @class */ (function () {
                 char = input[++current];
                 continue;
             }
+            //we want to record the lines
             if (NEW_LINE.test(char)) {
                 current++;
+                this.lineNumber = (this.lineNumber + 1);
+                tokens.push({ type: 'newline', value: this.lineNumber });
                 continue;
             }
             if (WHITESPACE.test(char)) {
@@ -79,14 +113,14 @@ var LexicalAnalyzer = /** @class */ (function () {
                 continue;
             }
             var doubleQuotedString = this.maybeDoubleQuotedStringCheck(char, input, current);
-            if (!_.isEmpty(doubleQuotedString)) {
+            if (doubleQuotedString.type) {
                 tokens.push(_.pick(doubleQuotedString, 'type', 'value'));
                 current = doubleQuotedString.current;
                 char = input[current];
                 continue;
             }
             var singleQuotedString = this.maybeSingleQuotedStringCheck(char, input, current);
-            if (!_.isEmpty(singleQuotedString)) {
+            if (singleQuotedString.type) {
                 tokens.push(_.pick(singleQuotedString, 'type', 'value'));
                 current = singleQuotedString.current;
                 char = input[current];
@@ -104,22 +138,11 @@ var LexicalAnalyzer = /** @class */ (function () {
                     case "const":
                     case "var":
                     case "let":
+                    case "new":
                         {
                             this.log(colors.yellow("entering " + char));
                             var results = this.start(input, current, ';');
                             tokens.push({ type: 'declaration', value: results.tokens });
-                            current = results.current;
-                            char = input[++current];
-                            break;
-                        }
-                    case "new":
-                    case "void":
-                    case "delete":
-                    case "in":
-                        {
-                            this.log(colors.yellow("entering " + char));
-                            var results = this.start(input, current, ';');
-                            tokens.push({ type: 'operator', value: results.tokens });
                             current = results.current;
                             char = input[++current];
                             break;
@@ -138,8 +161,8 @@ var LexicalAnalyzer = /** @class */ (function () {
                 continue;
             }
             if (char === ';') {
-                this.log(colors.yellow("newline" + char));
-                tokens.push({ type: 'newLine', value: char });
+                this.log(colors.yellow("end of line" + char));
+                tokens.push({ type: 'statementSeperator', value: char });
                 char = input[++current];
                 continue;
             }
@@ -196,6 +219,7 @@ var LexicalAnalyzer = /** @class */ (function () {
                         continue;
                     }
             }
+           
             //finally, people end their code in different ways, we log ; because there's a chance its the last 'thing'
             this.log(colors.red("DEBUG current curser " + current + ", last cursor " + input.length + " current char " + char + ", recursive exit condition is " + exitOn));
             throw new TypeError('unknown var type: ' + char);
@@ -215,7 +239,7 @@ var LexicalAnalyzer = /** @class */ (function () {
             char = input[++current];
             return { type: 'string', value: value, current: current };
         }
-        return {};
+        return { type: '', value: '' };
     };
     LexicalAnalyzer.prototype.maybeSingleQuotedStringCheck = function (char, input, current) {
         // value inside  double quotes
@@ -230,9 +254,9 @@ var LexicalAnalyzer = /** @class */ (function () {
             char = input[++current];
             return { type: 'string', value: value, current: current };
         }
-        return {};
+        return { type: '', value: '' };
     };
     return LexicalAnalyzer;
 }());
-exports.LexicalAnalyzer = LexicalAnalyzer;
+exports.default = LexicalAnalyzer;
 //# sourceMappingURL=index.js.map
