@@ -282,7 +282,7 @@ var LexicalAnalyzer = /** @class */ (function () {
             }
             //skip the closing quote
             char = input[++current];
-            return { type: 'string', value: value, current: current };
+            return { type: 'stringLiteral', value: value, current: current };
         }
         return { type: '', value: '' };
     };

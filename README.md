@@ -87,7 +87,7 @@ The tokenizer will recurse in the following conditions:
 ## Examples
 > There are more examples of this being used on a react file, normal js file and a file containing the 'old' 'defines' method to import things in ```./tests/beforeandafter```
 
-#### Some regex thing
+#### Some regex
 
 ``` js
    import * as _ from 'underscore';
@@ -230,6 +230,42 @@ The AST
     }],
     "current": 211
 }
+```
+
+### Some string literals
+
+``` js
+      
+   const string = `something ${1 + 2 + 3}`
+   const string2 = `something ${(true) ? 'x' : 'y'}`
+   const string3 = `something
+   another ${'x'}
+   new line ${1 + 2 + 3}
+   test`
+```
+
+the AST
+
+```json
+   {
+    "tokens": [{
+        "type": "carriagereturn",
+        "value": 1
+    }, {
+        "type": "const",
+        "value": [{
+            "type": "name",
+            "value": "string"
+        }, {
+            "type": "assigner",
+            "value": "="
+        }, {
+            "type": "string",
+            "value": "something ${1 + 2 + 3}"
+        }]
+    }],
+    "current": null
+   }
 ```
 
 
