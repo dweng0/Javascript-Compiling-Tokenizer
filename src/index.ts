@@ -1,7 +1,8 @@
 import * as _ from 'underscore';
 import * as colors from 'colors';
 
-const NEW_LINE = /[\r\n]/;
+const CARRIAGE_RETURN = /\n/;
+const EOL = /\r/;
 const WHITESPACE = /\s/;
 const NUMBERS = /[0-9]/;
 const DECLARABLE_CHARACTERS = /[A-Za-z_.$]/i;
@@ -30,8 +31,7 @@ export default class LexicalAnalyzer {
     }
 
     constructor(options) {
-        if(_.isEmpty(options))
-        {
+        if (_.isEmpty(options)) {
             throw new Error('No options have been provided');
         }
 
@@ -39,14 +39,13 @@ export default class LexicalAnalyzer {
             this.verbose = true;
         }
 
-        if(options.thirdPartyParsingTests && options.thirdPartyParsingTests.length > 0)
-        {
+        if (options.thirdPartyParsingTests && options.thirdPartyParsingTests.length > 0) {
             this.thirdPartyParsingTests = [...this.thirdPartyParsingTests, options.thirdPartyParsingTests];
         }
     }
+
     start(input, current?, exitOn?) {
-        if(!input)
-        {
+        if (!input) {
             throw new Error('No Input string provided');
         }
 
@@ -67,23 +66,19 @@ export default class LexicalAnalyzer {
                 break;
             }
 
-            if(!_.isEmpty(this.thirdPartyParsingTests))
-            {
+            if (!_.isEmpty(this.thirdPartyParsingTests)) {
                 let thirdPartyTokens = Array<IPayload>();
                 this.thirdPartyParsingTests.forEach(test => {
                     let result = test(char, current, input);
-                    if(result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value) )
-                    {
-                        if(!result.currentCursorPosition)
-                        {
+                    if (result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value)) {
+                        if (!result.currentCursorPosition) {
                             throw new Error('Third party parsing function must return the new cursor position');
                         }
 
                         tokens.push(result.payload);
                         current = result.currentCursorPosition;
                     }
-                    else
-                    {
+                    else {
                         this.log('third party function returned no results, continuing');
                     }
                 });
@@ -121,14 +116,28 @@ export default class LexicalAnalyzer {
                 continue;
             }
 
-            //we want to record the lines
-            if (NEW_LINE.test(char)) {
+            const isNewLine = (char) => {
+                let newLine = false;
+                if (EOL.test(char)) {
+                    this.lineNumber = (this.lineNumber + 1);
+                    tokens.push({ type: 'eol', value: this.lineNumber });
+                    newLine = true;
+                }
+                if(CARRIAGE_RETURN.test(char))
+                {
+                    this.lineNumber = (this.lineNumber + 1);
+                    tokens.push({ type: 'carriagereturn', value: this.lineNumber });
+                    newLine = true;
+                }
+                return newLine;
+            }
+           
+            //test for cr and lf
+            if(isNewLine(char))
+            {
                 current++;
-                this.lineNumber = (this.lineNumber + 1);
-                tokens.push({type: 'newline', value: this.lineNumber});
                 continue;
             }
-
 
             if (WHITESPACE.test(char)) {
                 current++;
@@ -216,7 +225,7 @@ export default class LexicalAnalyzer {
             //inline comment
             if (char === "/" && input[current + 1] == "/") {
                 let value = '';
-                while (!NEW_LINE.test(char)) {
+                while (!isNewLine(char)) {
                     value += char;
                     char = input[++current];
                 }
@@ -290,7 +299,7 @@ export default class LexicalAnalyzer {
             char = input[++current];
             return { type: 'string', value, current };
         }
-        return {type: '', value: ''}
+        return { type: '', value: '' }
     }
 
     maybeSingleQuotedStringCheck(char, input, current) {
@@ -307,6 +316,6 @@ export default class LexicalAnalyzer {
             char = input[++current];
             return { type: 'string', value, current };
         }
-        return {type: '', value: ''}
+        return { type: '', value: '' }
     }
 }
