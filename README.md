@@ -87,6 +87,152 @@ The tokenizer will recurse in the following conditions:
 ## Examples
 > There are more examples of this being used on a react file, normal js file and a file containing the 'old' 'defines' method to import things in ```./tests/beforeandafter```
 
+#### Some regex thing
+
+``` js
+   import * as _ from 'underscore';
+   import * as colors from 'colors';
+
+   const CARRIAGE_RETURN = /\n/;
+   const EOL = /\r/;
+   const WHITESPACE = /\s/;
+   const NUMBERS = /[0-9]/;
+   const DECLARABLE_CHARACTERS = /[A-Za-z_.$]/i;
+```
+
+The AST
+
+``` json
+   {
+    "tokens": [{
+        "type": "name",
+        "value": "import"
+    }, {
+        "type": "operator",
+        "value": "*"
+    }, {
+        "type": "name",
+        "value": "as"
+    }, {
+        "type": "name",
+        "value": "_"
+    }, {
+        "type": "name",
+        "value": "from"
+    }, {
+        "type": "string",
+        "value": "underscore"
+    }, {
+        "type": "statementSeperator",
+        "value": ";"
+    }, {
+        "type": "carriagereturn",
+        "value": 1
+    }, {
+        "type": "name",
+        "value": "import"
+    }, {
+        "type": "operator",
+        "value": "*"
+    }, {
+        "type": "name",
+        "value": "as"
+    }, {
+        "type": "name",
+        "value": "colors"
+    }, {
+        "type": "name",
+        "value": "from"
+    }, {
+        "type": "string",
+        "value": "colors"
+    }, {
+        "type": "statementSeperator",
+        "value": ";"
+    }, {
+        "type": "carriagereturn",
+        "value": 2
+    }, {
+        "type": "carriagereturn",
+        "value": 3
+    }, {
+        "type": "const",
+        "value": [{
+            "type": "name",
+            "value": "CARRIAGE_RETURN"
+        }, {
+            "type": "assigner",
+            "value": "="
+        }, {
+            "type": "assignee",
+            "value": "/\\n/"
+        }]
+    }, {
+        "type": "carriagereturn",
+        "value": 4
+    }, {
+        "type": "const",
+        "value": [{
+            "type": "name",
+            "value": "EOL"
+        }, {
+            "type": "assigner",
+            "value": "="
+        }, {
+            "type": "assignee",
+            "value": "/\\r/"
+        }]
+    }, {
+        "type": "carriagereturn",
+        "value": 5
+    }, {
+        "type": "const",
+        "value": [{
+            "type": "name",
+            "value": "WHITESPACE"
+        }, {
+            "type": "assigner",
+            "value": "="
+        }, {
+            "type": "assignee",
+            "value": "/\\s/"
+        }]
+    }, {
+        "type": "carriagereturn",
+        "value": 6
+    }, {
+        "type": "const",
+        "value": [{
+            "type": "name",
+            "value": "NUMBERS"
+        }, {
+            "type": "assigner",
+            "value": "="
+        }, {
+            "type": "assignee",
+            "value": "/[0-9]/"
+        }]
+    }, {
+        "type": "carriagereturn",
+        "value": 7
+    }, {
+        "type": "const",
+        "value": [{
+            "type": "name",
+            "value": "DECLARABLE_CHARACTERS"
+        }, {
+            "type": "assigner",
+            "value": "="
+        }, {
+            "type": "assignee",
+            "value": "/[A-Za-z_.$]/i"
+        }]
+    }],
+    "current": 211
+}
+```
+
+
 #### A class
 ``` js
     export default class {
