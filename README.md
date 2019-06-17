@@ -27,7 +27,7 @@ Install it
 Import it
 
 ```
-    import LexicalAnalyzer from 'javascript-compiling-tokenizer';
+    import { LexicalAnalyzer } from 'javascript-compiling-tokenizer';
 ```
 
 Initialize it
@@ -59,7 +59,7 @@ options
 
 ## Injecting your own third party lexical checks
 Its as simple as providing an array of functions. The functions are given the following arguments: <br/><br/>
-``` char:string, current:number, input:string ``` 
+``` char:string, current:number, input:string ```
 
 char is the string at the current position, current is the index of the current position in the input string and input is a stringified version of the whole file.
 
@@ -417,237 +417,237 @@ The AST for that class
 The AST
 
 ``` json
-    {  
-   "tokens":[  
-      {  
+    {
+   "tokens":[
+      {
          "type":"carriagereturn",
          "value":1
       },
-      {  
+      {
          "type":"name",
          "value":"import"
       },
-      {  
+      {
          "type":"name",
          "value":"React"
       },
-      {  
+      {
          "type":"name",
          "value":"from"
       },
-      {  
+      {
          "type":"string",
          "value":"react"
       },
-      {  
+      {
          "type":"statementSeperator",
          "value":";"
       },
-      {  
+      {
          "type":"carriagereturn",
          "value":2
       },
-      {  
+      {
          "type":"name",
          "value":"import"
       },
-      {  
+      {
          "type":"name",
          "value":"ReactDOM"
       },
-      {  
+      {
          "type":"name",
          "value":"from"
       },
-      {  
+      {
          "type":"string",
          "value":"react-dom"
       },
-      {  
+      {
          "type":"statementSeperator",
          "value":";"
       },
-      {  
+      {
          "type":"carriagereturn",
          "value":3
       },
-      {  
+      {
          "type":"name",
          "value":"import"
       },
-      {  
+      {
          "type":"codeblock",
-         "value":[  
-            {  
+         "value":[
+            {
                "type":"name",
                "value":"Provider"
             }
          ]
       },
-      {  
+      {
          "type":"name",
          "value":"from"
       },
-      {  
+      {
          "type":"string",
          "value":"react-redux"
       },
-      {  
+      {
          "type":"statementSeperator",
          "value":";"
       },
-      {  
+      {
          "type":"carriagereturn",
          "value":4
       },
-      {  
+      {
          "type":"name",
          "value":"import"
       },
-      {  
+      {
          "type":"codeblock",
-         "value":[  
-            {  
+         "value":[
+            {
                "type":"name",
                "value":"createStore"
             }
          ]
       },
-      {  
+      {
          "type":"name",
          "value":"from"
       },
-      {  
+      {
          "type":"string",
          "value":"redux"
       },
-      {  
+      {
          "type":"statementSeperator",
          "value":";"
       },
-      {  
+      {
          "type":"carriagereturn",
          "value":5
       },
-      {  
+      {
          "type":"carriagereturn",
          "value":6
       },
-      {  
+      {
          "type":"name",
          "value":"import"
       },
-      {  
+      {
          "type":"name",
          "value":"App"
       },
-      {  
+      {
          "type":"name",
          "value":"from"
       },
-      {  
+      {
          "type":"string",
          "value":"./components/App"
       },
-      {  
+      {
          "type":"statementSeperator",
          "value":";"
       },
-      {  
+      {
          "type":"carriagereturn",
          "value":7
       },
-      {  
+      {
          "type":"name",
          "value":"import"
       },
-      {  
+      {
          "type":"name",
          "value":"OfflineMode"
       },
-      {  
+      {
          "type":"name",
          "value":"from"
       },
-      {  
+      {
          "type":"string",
          "value":"react-off-the-grid"
       },
-      {  
+      {
          "type":"statementSeperator",
          "value":";"
       },
-      {  
+      {
          "type":"carriagereturn",
          "value":8
       },
-      {  
+      {
          "type":"name",
          "value":"import"
       },
-      {  
+      {
          "type":"name",
          "value":"reducers"
       },
-      {  
+      {
          "type":"name",
          "value":"from"
       },
-      {  
+      {
          "type":"string",
          "value":"./reducers"
       },
-      {  
+      {
          "type":"statementSeperator",
          "value":";"
       },
-      {  
+      {
          "type":"carriagereturn",
          "value":9
       },
-      {  
+      {
          "type":"carriagereturn",
          "value":10
       },
-      {  
+      {
          "type":"name",
          "value":"import"
       },
-      {  
+      {
          "type":"string",
          "value":"./index.css"
       },
-      {  
+      {
          "type":"statementSeperator",
          "value":";"
       },
-      {  
+      {
          "type":"carriagereturn",
          "value":11
       },
-      {  
+      {
          "type":"carriagereturn",
          "value":12
       },
-      {  
+      {
          "type":"declaration",
-         "value":[  
-            {  
+         "value":[
+            {
                "type":"name",
                "value":"store"
             },
-            {  
+            {
                "type":"operator",
                "value":"="
             },
-            {  
+            {
                "type":"name",
                "value":"createStore"
             },
-            {  
+            {
                "type":"params",
-               "value":[  
-                  {  
+               "value":[
+                  {
                      "type":"name",
                      "value":"reducers"
                   }
@@ -655,64 +655,64 @@ The AST
             }
          ]
       },
-      {  
+      {
          "type":"carriagereturn",
          "value":13
       },
-      {  
+      {
          "type":"name",
          "value":"ReactDOM.render"
       },
-      {  
+      {
          "type":"params",
-         "value":[  
-            {  
+         "value":[
+            {
                "type":"carriagereturn",
                "value":14
             },
-            {  
+            {
                "type":"operator",
                "value":"<"
             },
-            {  
+            {
                "type":"name",
                "value":"div"
             },
-            {  
+            {
                "type":"name",
                "value":"className"
             },
-            {  
+            {
                "type":"operator",
                "value":"="
             },
-            {  
+            {
                "type":"string",
                "value":"ui container"
             },
-            {  
+            {
                "type":"name",
                "value":"style"
             },
-            {  
+            {
                "type":"operator",
                "value":"="
             },
-            {  
+            {
                "type":"codeblock",
-               "value":[  
-                  {  
+               "value":[
+                  {
                      "type":"codeblock",
-                     "value":[  
-                        {  
+                     "value":[
+                        {
                            "type":"name",
                            "value":"marginTop"
                         },
-                        {  
+                        {
                            "type":"operator",
                            "value":":"
                         },
-                        {  
+                        {
                            "type":"string",
                            "value":"3em"
                         }
@@ -720,164 +720,164 @@ The AST
                   }
                ]
             },
-            {  
+            {
                "type":"operator",
                "value":">"
             },
-            {  
+            {
                "type":"carriagereturn",
                "value":15
             },
-            {  
+            {
                "type":"operator",
                "value":"<"
             },
-            {  
+            {
                "type":"name",
                "value":"OfflineMode"
             },
-            {  
+            {
                "type":"name",
                "value":"saveName"
             },
-            {  
+            {
                "type":"operator",
                "value":"="
             },
-            {  
+            {
                "type":"string",
                "value":"MOOSE_FILE"
             },
-            {  
+            {
                "type":"name",
                "value":"store"
             },
-            {  
+            {
                "type":"operator",
                "value":"="
             },
-            {  
+            {
                "type":"codeblock",
-               "value":[  
-                  {  
+               "value":[
+                  {
                      "type":"name",
                      "value":"store"
                   }
                ]
             },
-            {  
+            {
                "type":"operator",
                "value":"/"
             },
-            {  
+            {
                "type":"operator",
                "value":">"
             },
-            {  
+            {
                "type":"carriagereturn",
                "value":16
             },
-            {  
+            {
                "type":"operator",
                "value":"<"
             },
-            {  
+            {
                "type":"name",
                "value":"Provider"
             },
-            {  
+            {
                "type":"name",
                "value":"store"
             },
-            {  
+            {
                "type":"operator",
                "value":"="
             },
-            {  
+            {
                "type":"codeblock",
-               "value":[  
-                  {  
+               "value":[
+                  {
                      "type":"name",
                      "value":"store"
                   }
                ]
             },
-            {  
+            {
                "type":"operator",
                "value":">"
             },
-            {  
+            {
                "type":"carriagereturn",
                "value":17
             },
-            {  
+            {
                "type":"operator",
                "value":"<"
             },
-            {  
+            {
                "type":"name",
                "value":"App"
             },
-            {  
+            {
                "type":"operator",
                "value":"/"
             },
-            {  
+            {
                "type":"operator",
                "value":">"
             },
-            {  
+            {
                "type":"carriagereturn",
                "value":18
             },
-            {  
+            {
                "type":"operator",
                "value":"<"
             },
-            {  
+            {
                "type":"operator",
                "value":"/"
             },
-            {  
+            {
                "type":"name",
                "value":"Provider"
             },
-            {  
+            {
                "type":"operator",
                "value":">"
             },
-            {  
+            {
                "type":"carriagereturn",
                "value":19
             },
-            {  
+            {
                "type":"operator",
                "value":"<"
             },
-            {  
+            {
                "type":"operator",
                "value":"/"
             },
-            {  
+            {
                "type":"name",
                "value":"div"
             },
-            {  
+            {
                "type":"operator",
                "value":">"
             },
-            {  
+            {
                "type":"seperator",
                "value":","
             },
-            {  
+            {
                "type":"name",
                "value":"document.getElementById"
             },
-            {  
+            {
                "type":"params",
-               "value":[  
-                  {  
+               "value":[
+                  {
                      "type":"string",
                      "value":"root"
                   }
@@ -885,7 +885,7 @@ The AST
             }
          ]
       },
-      {  
+      {
          "type":"statementSeperator",
          "value":";"
       }
