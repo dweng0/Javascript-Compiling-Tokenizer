@@ -74,11 +74,7 @@ The function must return an object ```(IThirdPartyParsingResult)``` containing:
 
 Third party lexical checks are always performed first.
 
-## Coming soon
-
-documentation on the AST layout
-
-### Dev notes
+## Dev notes
 
 The tokenizer will recurse in the following conditions:
 
