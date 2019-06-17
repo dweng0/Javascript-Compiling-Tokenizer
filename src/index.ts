@@ -25,8 +25,54 @@ interface IThirdPartyParsingResult {
 }
 
 export class Generator {
-    start() {
-
+    start(tokens) {
+        return tokens.reduce((content, token) => {
+        switch(token.type)
+        {
+            case "operator":
+            case "statementseperator":
+            case "assigner":
+            case "assignee":
+            case "seperator":
+            case "number":
+            case "string":
+            case "name":
+            {
+                return content += `${token.value} `;
+            }
+            case "eol":
+            case "carriagereturn":
+            {
+                return content += token.value;
+            }
+            case "multilinecomment":
+            {
+                return content += `/** ${token.value} */`;
+            }
+            case "inlinecomment":
+            {
+                return content += '//' + token.value;
+            }
+            case "const":
+            case "var":
+            case "let":
+            {
+                return content += `${token.type} ${this.start(token.value)}`;
+            }
+            case "params":
+            {
+                return content += `(${this.start(token.value)})`;
+            }
+            case "array":
+            {
+                return content += `[${this.start(token.value)}]`;
+            }
+            case "codeblock":
+            {
+                return content += `{${this.start(token.value)}}`;
+            }
+        }
+        },"");
     }
 }
 
@@ -79,7 +125,6 @@ export class LexicalAnalyzer {
             }
 
             if (!_.isEmpty(this.thirdPartyParsingTests)) {
-                let thirdPartyTokens = Array<IPayload>();
                 this.thirdPartyParsingTests.forEach(test => {
                     let result = test(char, current, input);
                     if (result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value)) {
