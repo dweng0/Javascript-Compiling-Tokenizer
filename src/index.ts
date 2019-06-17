@@ -25,15 +25,14 @@ interface IThirdPartyParsingResult {
     currentCursorPosition: number
 }
 
+//Generate code from the lexer
 export class Generator {
     start(tokens) {
         return tokens.reduce((content, token) => {
         switch(token.type)
         {
             case "operator":
-            case "statementseperator":
             case "assigner":
-            case "assignee":
             case "seperator":
             case "number":
             case "name":
@@ -44,6 +43,8 @@ export class Generator {
             case "eol":
             case "carriagereturn":
             case "string":
+            case "assignee":
+            case "statementseperator":
             {
                 return content += token.value;
             }
@@ -388,8 +389,6 @@ export class LexicalAnalyzer {
                     }
             }
 
-
-            //finally, people end their code in different ways, we log ; because there's a chance its the last 'thing'
             this.log(colors.red(`DEBUG current curser ${current}, last cursor ${input.length} current char ${char}, recursive exit condition is ${exitOn}`));
             throw new TypeError('unknown var type: ' + char);
         }
@@ -412,7 +411,7 @@ export class LexicalAnalyzer {
     }
     stringConditional(condition, char, input, current) {
 
-         // capture the quots and the value inside  double/single quotes
+         // capture the quotes and the value inside  double/single quotes
         if (char === condition) {
 
             let value = condition;
