@@ -66,6 +66,28 @@ export default class LexicalAnalyzer {
 
                 break;
             }
+
+            if(!_.isEmpty(this.thirdPartyParsingTests))
+            {
+                let thirdPartyTokens = Array<IPayload>();
+                this.thirdPartyParsingTests.forEach(test => {
+                    let result = test(char, current, input);
+                    if(result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value) )
+                    {
+                        if(!result.currentCursorPosition)
+                        {
+                            throw new Error('Third party parsing function must return the new cursor position');
+                        }
+
+                        tokens.push(result.payload);
+                        current = result.currentCursorPosition;
+                    }
+                    else
+                    {
+                        this.log('third party function returned no results, continuing');
+                    }
+                });
+            }
             //paren
             if (char === '(') {
                 this.log(colors.yellow("entering " + char));
@@ -247,27 +269,6 @@ export default class LexicalAnalyzer {
                     }
             }
 
-            if(!_.isEmpty(this.thirdPartyParsingTests))
-            {
-                let thirdPartyTokens = Array<IPayload>();
-                this.thirdPartyParsingTests.forEach(test => {
-                    let result = test(char, current, input);
-                    if(result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value) )
-                    {
-                        if(!result.currentCursorPosition)
-                        {
-                            throw new Error('Third party parsing function must return the new cursor position');
-                        }
-
-                        tokens.push(result.payload);
-                        current = result.currentCursorPosition;
-                    }
-                    else
-                    {
-                        this.log('third party function returned no results, continuing');
-                    }
-                });
-            }
             //finally, people end their code in different ways, we log ; because there's a chance its the last 'thing'
             this.log(colors.red(`DEBUG current curser ${current}, last cursor ${input.length} current char ${char}, recursive exit condition is ${exitOn}`));
             throw new TypeError('unknown var type: ' + char);
