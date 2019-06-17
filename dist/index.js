@@ -5,12 +5,17 @@ var colors = require("colors");
 var CARRIAGE_RETURN = /\n/;
 var EOL = /\r/;
 var WHITESPACE = /\s/;
+/**
+ * Any char thats not a whitespace and not ;
+ */
+var ASSIGNABLE_CHARACTERS = /[^\s,^;]/;
 var NUMBERS = /[0-9]/;
 var DECLARABLE_CHARACTERS = /[A-Za-z_.$]/i;
 var LexicalAnalyzer = /** @class */ (function () {
     function LexicalAnalyzer(options) {
         this.verbose = false;
         this.lineNumber = 0;
+        this.assigner = false;
         this.thirdPartyParsingTests = [];
         if (_.isEmpty(options)) {
             throw new Error('No options have been provided');
@@ -127,6 +132,7 @@ var LexicalAnalyzer = /** @class */ (function () {
                 tokens.push(_.pick(doubleQuotedString, 'type', 'value'));
                 current = doubleQuotedString.current;
                 char = input[current];
+                this.assigner = false;
                 continue;
             }
             var singleQuotedString = this.maybeSingleQuotedStringCheck(char, input, current);
@@ -134,6 +140,7 @@ var LexicalAnalyzer = /** @class */ (function () {
                 tokens.push(_.pick(singleQuotedString, 'type', 'value'));
                 current = singleQuotedString.current;
                 char = input[current];
+                this.assigner = false;
                 continue;
             }
             if (DECLARABLE_CHARACTERS.test(char)) {
@@ -151,7 +158,7 @@ var LexicalAnalyzer = /** @class */ (function () {
                         {
                             this.log(colors.yellow("entering " + char));
                             var results = this.start(input, current, ';');
-                            tokens.push({ type: 'declaration', value: results.tokens });
+                            tokens.push({ type: value, value: results.tokens });
                             current = results.current;
                             char = input[++current];
                             break;
@@ -162,6 +169,25 @@ var LexicalAnalyzer = /** @class */ (function () {
                             break;
                         }
                 }
+                continue;
+            }
+            //check for assignment call
+            if (char === "=") {
+                tokens.push({ type: 'assigner', value: char });
+                this.assigner = true;
+                char = input[++current];
+                continue;
+            }
+            //if we have an assignment flag, then push any non whiespace chars into a new token until we reach a whitespace
+            if (this.assigner && ASSIGNABLE_CHARACTERS.test(char)) {
+                var value = '';
+                while (ASSIGNABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
+                    value += char;
+                    char = input[++current];
+                }
+                this.log(colors.bgCyan(value));
+                tokens.push({ type: 'assignee', value: value });
+                this.assigner = false;
                 continue;
             }
             if (char === ',') {
@@ -202,9 +228,13 @@ var LexicalAnalyzer = /** @class */ (function () {
                 current = (current + 2);
                 continue;
             }
+            if (char === "=") {
+                tokens.push({ type: 'assigner', value: char });
+                this.assigner = true;
+                continue;
+            }
             //operators
             switch (char) {
-                case "=":
                 case "<":
                 case ">":
                 case "&":

@@ -4,9 +4,15 @@ import * as colors from 'colors';
 const CARRIAGE_RETURN = /\n/;
 const EOL = /\r/;
 const WHITESPACE = /\s/;
-const NUMBERS = /[0-9]/;
-const DECLARABLE_CHARACTERS = /[A-Za-z_.$]/i;
 
+/**
+ * Any char thats not a whitespace and not ;
+ */
+const ASSIGNABLE_CHARACTERS = /[^\s,^;]/;
+
+const NUMBERS = /[0-9]/;
+
+const DECLARABLE_CHARACTERS = /[A-Za-z_.$]/i;
 
 interface IPayload {
     type: string,
@@ -22,6 +28,7 @@ interface IThirdPartyParsingResult {
 export default class LexicalAnalyzer {
     verbose: boolean = false;
     lineNumber: number = 0;
+    assigner: boolean = false;
     thirdPartyParsingTests: Array<(char: string, current: number, input: string) => IThirdPartyParsingResult> = [];
 
     log(message: string) {
@@ -164,6 +171,7 @@ export default class LexicalAnalyzer {
                 tokens.push(_.pick(doubleQuotedString, 'type', 'value'));
                 current = doubleQuotedString.current;
                 char = input[current];
+                this.assigner = false;
                 continue;
             }
 
@@ -176,6 +184,7 @@ export default class LexicalAnalyzer {
                 tokens.push(_.pick(singleQuotedString, 'type', 'value'));
                 current = singleQuotedString.current;
                 char = input[current];
+                this.assigner = false;
                 continue;
             }
 
@@ -195,7 +204,7 @@ export default class LexicalAnalyzer {
                         {
                             this.log(colors.yellow("entering " + char));
                             const results = this.start(input, current, ';');
-                            tokens.push({ type: 'declaration', value: results.tokens });
+                            tokens.push({ type: value, value: results.tokens });
                             current = results.current;
                             char = input[++current];
                             break;
@@ -206,10 +215,30 @@ export default class LexicalAnalyzer {
                             break;
                         }
                 }
-
                 continue;
             }
 
+            //check for assignment call
+            if (char === "=") {
+                tokens.push({ type: 'assigner', value: char });
+                this.assigner = true;
+                char = input[++current];
+                continue;
+            }
+
+            //if we have an assignment flag, then push any non whiespace chars into a new token until we reach a whitespace
+            if (this.assigner && ASSIGNABLE_CHARACTERS.test(char)) {
+                let value = '';
+                while (ASSIGNABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
+                    value += char;
+                    char = input[++current];
+                }
+                this.log(colors.bgCyan(value));
+                tokens.push({ type: 'assignee', value: value });
+                this.assigner = false;
+                continue;
+            }
+            
             if (char === ',') {
                 tokens.push({ type: 'seperator', value: char });
                 char = input[++current];
@@ -251,9 +280,15 @@ export default class LexicalAnalyzer {
                 continue;
             }
 
+            if(char === "=")
+            {
+                tokens.push({type: 'assigner', value: char});
+                this.assigner = true;
+                continue;
+            }
+
             //operators
             switch (char) {
-                case "=":
                 case "<":
                 case ">":
                 case "&":
@@ -277,6 +312,7 @@ export default class LexicalAnalyzer {
                         continue;
                     }
             }
+
 
             //finally, people end their code in different ways, we log ; because there's a chance its the last 'thing'
             this.log(colors.red(`DEBUG current curser ${current}, last cursor ${input.length} current char ${char}, recursive exit condition is ${exitOn}`));

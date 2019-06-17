@@ -3,7 +3,7 @@
     "compilerOptions": {
       "alwaysStrict": true,
       "outDir": "./dist",
-      "baseUrl": "ssrc",
+      "baseUrl": "src",
       "sourceMap": true,
       "declaration": false,
       "moduleResolution": "node",
