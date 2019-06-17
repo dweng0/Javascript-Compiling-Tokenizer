@@ -28,6 +28,7 @@ var LexicalAnalyzer = /** @class */ (function () {
     };
     LexicalAnalyzer.prototype.start = function (input, current, exitOn) {
         var _this = this;
+        debugger;
         if (!input) {
             throw new Error('No Input string provided');
         }
@@ -109,7 +110,7 @@ var LexicalAnalyzer = /** @class */ (function () {
             }
             if (DECLARABLE_CHARACTERS.test(char)) {
                 var value = '';
-                while (DECLARABLE_CHARACTERS.test(char)) {
+                while (DECLARABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
                     value += char;
                     char = input[++current];
                 }

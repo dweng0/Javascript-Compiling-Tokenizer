@@ -150,7 +150,7 @@ export default class LexicalAnalyzer {
 
             if (DECLARABLE_CHARACTERS.test(char)) {
                 let value = '';
-                while (DECLARABLE_CHARACTERS.test(char)) {
+                while (DECLARABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
                     value += char;
                     char = input[++current];
                 }
