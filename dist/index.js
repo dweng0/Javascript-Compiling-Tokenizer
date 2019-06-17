@@ -146,7 +146,7 @@ var LexicalAnalyzer = /** @class */ (function () {
             var backTickString = this.maybeBackTickStringCheck(char, input, current);
             if (backTickString.type) {
                 tokens.push(_.pick(backTickString, 'type', 'value'));
-                current = singleQuotedString.current;
+                current = backTickString.current;
                 char = input[current];
                 this.assigner = false;
                 continue;
@@ -273,14 +273,14 @@ var LexicalAnalyzer = /** @class */ (function () {
         return { tokens: tokens, current: current };
     };
     LexicalAnalyzer.prototype.maybeBackTickStringCheck = function (char, input, current) {
-        if (char === '`') {
+        var BACK_TICK = /`/;
+        if (BACK_TICK.test(char)) {
             var value = '';
             char = input[++current];
-            while (char !== '`') {
+            while (!BACK_TICK.test(char)) {
                 value += char;
                 char = input[++current];
             }
-            //skip the closing quote
             char = input[++current];
             return { type: 'stringLiteral', value: value, current: current };
         }

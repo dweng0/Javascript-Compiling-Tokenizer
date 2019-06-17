@@ -196,7 +196,7 @@ export default class LexicalAnalyzer {
             if(backTickString.type)
             {
                 tokens.push(_.pick(backTickString, 'type', 'value'));
-                current = singleQuotedString.current;
+                current = backTickString.current;
                 char = input[current];
                 this.assigner = false;
                 continue;
@@ -335,16 +335,15 @@ export default class LexicalAnalyzer {
         return { tokens, current };
     }
     maybeBackTickStringCheck(char: string, input: string, current: number) {
-      
-           if (char === '`') {
+            const BACK_TICK = /`/
+           if (BACK_TICK.test(char)) {
             let value = '';
-
             char = input[++current];
-            while (char !== '`') {
+            while (!BACK_TICK.test(char)) {
                 value += char;
                 char = input[++current];
             }
-            //skip the closing quote
+
             char = input[++current];
             return { type: 'stringLiteral', value, current };
         }

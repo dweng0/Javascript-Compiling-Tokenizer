@@ -235,13 +235,12 @@ The AST
 ### Some string literals
 
 ``` js
-      
-   const string = `something ${1 + 2 + 3}`
-   const string2 = `something ${(true) ? 'x' : 'y'}`
+   const string = `something ${1 + 2 + 3}`;
+   const string2 = `something ${(true) ? 'x' : 'y'}`;
    const string3 = `something
    another ${'x'}
    new line ${1 + 2 + 3}
-   test`
+   test`;
 ```
 
 the AST
