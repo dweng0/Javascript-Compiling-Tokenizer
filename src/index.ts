@@ -2,6 +2,7 @@ import * as _ from 'underscore';
 import * as colors from 'colors';
 
 const CARRIAGE_RETURN = /\n/;
+const TAB = /\t/;
 const EOL = /\r/;
 const WHITESPACE = /\s/;
 
@@ -35,13 +36,14 @@ export class Generator {
             case "assignee":
             case "seperator":
             case "number":
-            case "string":
             case "name":
             {
                 return content += `${token.value} `;
             }
+            case "tab":
             case "eol":
             case "carriagereturn":
+            case "string":
             {
                 return content += token.value;
             }
@@ -192,6 +194,12 @@ export class LexicalAnalyzer {
             //test for cr and lf
             if(isNewLine(char))
             {
+                current++;
+                continue;
+            }
+
+            if(TAB.test(char)) {
+                tokens.push({ type: 'tab', value: char});
                 current++;
                 continue;
             }
