@@ -212,7 +212,8 @@ export class LexicalAnalyzer {
                 continue;
             }
 
-            const doubleQuotedString = this.maybeDoubleQuotedStringCheck(
+            const doubleQuotedString = this.stringConditional(
+                '"',
                 char,
                 input,
                 current
@@ -225,7 +226,8 @@ export class LexicalAnalyzer {
                 continue;
             }
 
-            const singleQuotedString = this.maybeSingleQuotedStringCheck(
+            const singleQuotedString = this.stringConditional(
+                "'",
                 char,
                 input,
                 current
@@ -388,47 +390,31 @@ export class LexicalAnalyzer {
     maybeBackTickStringCheck(char: string, input: string, current: number) {
             const BACK_TICK = /`/
            if (BACK_TICK.test(char)) {
-            let value = '';
+            let value = "`";
             char = input[++current];
             while (!BACK_TICK.test(char)) {
                 value += char;
                 char = input[++current];
             }
-
+            value += "`";
             char = input[++current];
             return { type: 'stringLiteral', value, current };
         }
         return { type: '', value: '' }
     }
+    stringConditional(condition, char, input, current) {
 
-    maybeDoubleQuotedStringCheck(char, input, current) {
-        // value inside  double quotes
-        if (char === '"') {
-            let value = '';
+         // capture the quots and the value inside  double/single quotes
+        if (char === condition) {
 
+            let value = condition;
             char = input[++current];
             while (char !== '"') {
                 value += char;
                 char = input[++current];
             }
-            //skip the closing quote
-            char = input[++current];
-            return { type: 'string', value, current };
-        }
-        return { type: '', value: '' }
-    }
+            value += condition;
 
-    maybeSingleQuotedStringCheck(char, input, current) {
-        // value inside  double quotes
-        if (char === "'") {
-            let value = '';
-
-            char = input[++current];
-            while (char !== "'") {
-                value += char;
-                char = input[++current];
-            }
-            //skip the closing quote
             char = input[++current];
             return { type: 'string', value, current };
         }
