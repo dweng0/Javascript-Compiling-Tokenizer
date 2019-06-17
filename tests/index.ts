@@ -39,4 +39,17 @@ describe('Lexer tests', () => {
         }
         expect(test()).to.be.an('object');
     })
+
+    it('should return an empty tokens array', () =>{ 
+        const results =  lexer({verbose: false}).start('define');
+        expect(results.tokens).to.not.be.undefined;
+        expect(results.tokens).to.not.be.empty;
+        expect(results.tokens).to.be.lengthOf(1);
+    })
+
+    it('should return an object with an array of tokens', () => {
+        let results = lexer({verbose: false}).start('(["thing","sing","wing"]) => {return true}');
+        expect(results.tokens).to.be.an('array');
+        expect(results.tokens).to.not.be.empty;
+    })
 }); 
