@@ -143,6 +143,14 @@ var LexicalAnalyzer = /** @class */ (function () {
                 this.assigner = false;
                 continue;
             }
+            var backTickString = this.maybeBackTickStringCheck(char, input, current);
+            if (backTickString.type) {
+                tokens.push(_.pick(backTickString, 'type', 'value'));
+                current = singleQuotedString.current;
+                char = input[current];
+                this.assigner = false;
+                continue;
+            }
             if (DECLARABLE_CHARACTERS.test(char)) {
                 var value = '';
                 while (DECLARABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
@@ -263,6 +271,20 @@ var LexicalAnalyzer = /** @class */ (function () {
             throw new TypeError('unknown var type: ' + char);
         }
         return { tokens: tokens, current: current };
+    };
+    LexicalAnalyzer.prototype.maybeBackTickStringCheck = function (char, input, current) {
+        if (char === '`') {
+            var value = '';
+            char = input[++current];
+            while (char !== '`') {
+                value += char;
+                char = input[++current];
+            }
+            //skip the closing quote
+            char = input[++current];
+            return { type: 'string', value: value, current: current };
+        }
+        return { type: '', value: '' };
     };
     LexicalAnalyzer.prototype.maybeDoubleQuotedStringCheck = function (char, input, current) {
         // value inside  double quotes

@@ -188,6 +188,20 @@ export default class LexicalAnalyzer {
                 continue;
             }
 
+            const backTickString = this.maybeBackTickStringCheck(
+                char,
+                input,
+                current
+            );
+            if(backTickString.type)
+            {
+                tokens.push(_.pick(backTickString, 'type', 'value'));
+                current = singleQuotedString.current;
+                char = input[current];
+                this.assigner = false;
+                continue;
+            }
+
             if (DECLARABLE_CHARACTERS.test(char)) {
                 let value = '';
                 while (DECLARABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
@@ -319,6 +333,22 @@ export default class LexicalAnalyzer {
             throw new TypeError('unknown var type: ' + char);
         }
         return { tokens, current };
+    }
+    maybeBackTickStringCheck(char: string, input: string, current: number) {
+      
+           if (char === '`') {
+            let value = '';
+
+            char = input[++current];
+            while (char !== '`') {
+                value += char;
+                char = input[++current];
+            }
+            //skip the closing quote
+            char = input[++current];
+            return { type: 'stringLiteral', value, current };
+        }
+        return { type: '', value: '' }
     }
 
     maybeDoubleQuotedStringCheck(char, input, current) {
