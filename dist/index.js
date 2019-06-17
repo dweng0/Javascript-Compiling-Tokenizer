@@ -23,12 +23,11 @@ var LexicalAnalyzer = /** @class */ (function () {
     }
     LexicalAnalyzer.prototype.log = function (message) {
         if (this.verbose) {
-            return this.log(message);
+            return console.log(message);
         }
     };
     LexicalAnalyzer.prototype.start = function (input, current, exitOn) {
         var _this = this;
-        debugger;
         if (!input) {
             throw new Error('No Input string provided');
         }
@@ -44,24 +43,6 @@ var LexicalAnalyzer = /** @class */ (function () {
                 }
                 break;
             }
-
-            if (!_.isEmpty(this.thirdPartyParsingTests)) {
-                var thirdPartyTokens = Array();
-                this.thirdPartyParsingTests.forEach(function (test) {
-                    var result = test(char, current, input);
-                    if (result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value)) {
-                        if (!result.currentCursorPosition) {
-                            throw new Error('Third party parsing function must return the new cursor position');
-                        }
-                        tokens.push(result.payload);
-                        current = result.currentCursorPosition;
-                    }
-                    else {
-                        _this.log('third party function returned no results, continuing');
-                    }
-                });
-            }
-
             //paren
             if (char === '(') {
                 this.log(colors.yellow("entering " + char));
@@ -138,7 +119,6 @@ var LexicalAnalyzer = /** @class */ (function () {
                     case "const":
                     case "var":
                     case "let":
-                    case "new":
                         {
                             this.log(colors.yellow("entering " + char));
                             var results = this.start(input, current, ';');
@@ -219,7 +199,22 @@ var LexicalAnalyzer = /** @class */ (function () {
                         continue;
                     }
             }
-           
+            if (!_.isEmpty(this.thirdPartyParsingTests)) {
+                var thirdPartyTokens = Array();
+                this.thirdPartyParsingTests.forEach(function (test) {
+                    var result = test(char, current, input);
+                    if (result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value)) {
+                        if (!result.currentCursorPosition) {
+                            throw new Error('Third party parsing function must return the new cursor position');
+                        }
+                        tokens.push(result.payload);
+                        current = result.currentCursorPosition;
+                    }
+                    else {
+                        _this.log('third party function returned no results, continuing');
+                    }
+                });
+            }
             //finally, people end their code in different ways, we log ; because there's a chance its the last 'thing'
             this.log(colors.red("DEBUG current curser " + current + ", last cursor " + input.length + " current char " + char + ", recursive exit condition is " + exitOn));
             throw new TypeError('unknown var type: ' + char);

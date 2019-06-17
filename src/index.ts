@@ -25,7 +25,7 @@ export default class LexicalAnalyzer {
 
     log(message: string) {
         if (this.verbose) {
-            return this.log(message);
+            return console.log(message);
         }
     }
 
@@ -45,7 +45,6 @@ export default class LexicalAnalyzer {
         }
     }
     start(input, current?, exitOn?) {
-        debugger;
         if(!input)
         {
             throw new Error('No Input string provided');
@@ -162,7 +161,6 @@ export default class LexicalAnalyzer {
                     case "const":
                     case "var":
                     case "let":
-                    case "new":
                         {
                             this.log(colors.yellow("entering " + char));
                             const results = this.start(input, current, ';');

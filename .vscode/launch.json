@@ -6,7 +6,7 @@
             "type": "node",
             "request": "launch",
             "name": "debugMode",
-            "program": "${workspaceRoot}\\dist\\index.js",
+            "program": "${workspaceRoot}\\dist\\debug.js",
             "stopOnEntry": false,
             "args": ["transpile", "-v", "${workspaceRoot}\\tests"],
             "cwd": "${workspaceRoot}\\dist",
