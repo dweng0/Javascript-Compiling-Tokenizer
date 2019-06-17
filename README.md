@@ -8,7 +8,7 @@
 
 Hello, welcome to JavaScript tokenizer
 
-This project has the sole purpose of tokenizing JavaScript by traversing the a given file (stringified) and generating an abstract syntax tree from the resulting tokenization process
+This project has the sole purpose of tokenizing JavaScript by traversing a given file (stringified) and generating an abstract syntax tree from the resulting tokenization process
 
 JCT does not worry about loading the files or what to do with the files after pushing them into an abstract syntax tree it simply concerns itself with the process of generating an AST
 
