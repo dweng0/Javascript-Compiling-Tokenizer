@@ -87,9 +87,590 @@ The tokenizer will recurse in the following conditions:
 - if it finds an opening array ```[```
 - if it finds a declaration ``` const, let, var ```
 
-The code generated will consist of:
 
+## Examples
+There are more examples of this being used on a react file, normal js file and a file containing the 'old' 'defines' method to import things in ```./tests/beforeandafter```
+
+#### A class
+``` js
+    export default class {
+    constructor() {
+
+    }
+    randomFn() {
+        return 'this is awesome'
+    }
+}
 ```
-TODO
 
+The AST for that class
+
+``` json
+    {
+    "tokens": [{
+        "type": "name",
+        "value": "export"
+    }, {
+        "type": "name",
+        "value": "default"
+    }, {
+        "type": "name",
+        "value": "class"
+    }, {
+        "type": "codeblock",
+        "value": [{
+            "type": "carriagereturn",
+            "value": 1
+        }, {
+            "type": "name",
+            "value": "constructor"
+        }, {
+            "type": "params",
+            "value": []
+        }, {
+            "type": "codeblock",
+            "value": [{
+                "type": "carriagereturn",
+                "value": 2
+            }, {
+                "type": "carriagereturn",
+                "value": 3
+            }]
+        }, {
+            "type": "carriagereturn",
+            "value": 4
+        }, {
+            "type": "name",
+            "value": "randomFn"
+        }, {
+            "type": "params",
+            "value": []
+        }, {
+            "type": "codeblock",
+            "value": [{
+                "type": "carriagereturn",
+                "value": 5
+            }, {
+                "type": "name",
+                "value": "return"
+            }, {
+                "type": "string",
+                "value": "this is awesome"
+            }, {
+                "type": "carriagereturn",
+                "value": 6
+            }]
+        }, {
+            "type": "carriagereturn",
+            "value": 7
+        }]
+    }],
+    "current": 107
+}
+```
+
+### React app file
+> Note, you can obviously make it a bit smarter for complex frameworks by injecting your own lexer functions. They will be called first and can tell the rest of the app where to continue from once your magical function has done its magic
+
+``` js
+
+    import React from 'react';
+    import ReactDOM from 'react-dom';
+    import { Provider } from 'react-redux';
+    import { createStore } from 'redux';
+
+    import App from './components/App';
+    import OfflineMode from 'react-off-the-grid';
+    import reducers from './reducers';
+
+    import './index.css';
+
+    const store = createStore(reducers);
+    ReactDOM.render(
+    <div className="ui container" style={{ marginTop: '3em' }}>
+        <OfflineMode saveName="MOOSE_FILE" store={store} />
+        <Provider store={ store }>
+        <App/>
+    </Provider>
+    </div>, document.getElementById('root'));
+```
+
+The AST
+
+``` json
+    {  
+   "tokens":[  
+      {  
+         "type":"carriagereturn",
+         "value":1
+      },
+      {  
+         "type":"name",
+         "value":"import"
+      },
+      {  
+         "type":"name",
+         "value":"React"
+      },
+      {  
+         "type":"name",
+         "value":"from"
+      },
+      {  
+         "type":"string",
+         "value":"react"
+      },
+      {  
+         "type":"statementSeperator",
+         "value":";"
+      },
+      {  
+         "type":"carriagereturn",
+         "value":2
+      },
+      {  
+         "type":"name",
+         "value":"import"
+      },
+      {  
+         "type":"name",
+         "value":"ReactDOM"
+      },
+      {  
+         "type":"name",
+         "value":"from"
+      },
+      {  
+         "type":"string",
+         "value":"react-dom"
+      },
+      {  
+         "type":"statementSeperator",
+         "value":";"
+      },
+      {  
+         "type":"carriagereturn",
+         "value":3
+      },
+      {  
+         "type":"name",
+         "value":"import"
+      },
+      {  
+         "type":"codeblock",
+         "value":[  
+            {  
+               "type":"name",
+               "value":"Provider"
+            }
+         ]
+      },
+      {  
+         "type":"name",
+         "value":"from"
+      },
+      {  
+         "type":"string",
+         "value":"react-redux"
+      },
+      {  
+         "type":"statementSeperator",
+         "value":";"
+      },
+      {  
+         "type":"carriagereturn",
+         "value":4
+      },
+      {  
+         "type":"name",
+         "value":"import"
+      },
+      {  
+         "type":"codeblock",
+         "value":[  
+            {  
+               "type":"name",
+               "value":"createStore"
+            }
+         ]
+      },
+      {  
+         "type":"name",
+         "value":"from"
+      },
+      {  
+         "type":"string",
+         "value":"redux"
+      },
+      {  
+         "type":"statementSeperator",
+         "value":";"
+      },
+      {  
+         "type":"carriagereturn",
+         "value":5
+      },
+      {  
+         "type":"carriagereturn",
+         "value":6
+      },
+      {  
+         "type":"name",
+         "value":"import"
+      },
+      {  
+         "type":"name",
+         "value":"App"
+      },
+      {  
+         "type":"name",
+         "value":"from"
+      },
+      {  
+         "type":"string",
+         "value":"./components/App"
+      },
+      {  
+         "type":"statementSeperator",
+         "value":";"
+      },
+      {  
+         "type":"carriagereturn",
+         "value":7
+      },
+      {  
+         "type":"name",
+         "value":"import"
+      },
+      {  
+         "type":"name",
+         "value":"OfflineMode"
+      },
+      {  
+         "type":"name",
+         "value":"from"
+      },
+      {  
+         "type":"string",
+         "value":"react-off-the-grid"
+      },
+      {  
+         "type":"statementSeperator",
+         "value":";"
+      },
+      {  
+         "type":"carriagereturn",
+         "value":8
+      },
+      {  
+         "type":"name",
+         "value":"import"
+      },
+      {  
+         "type":"name",
+         "value":"reducers"
+      },
+      {  
+         "type":"name",
+         "value":"from"
+      },
+      {  
+         "type":"string",
+         "value":"./reducers"
+      },
+      {  
+         "type":"statementSeperator",
+         "value":";"
+      },
+      {  
+         "type":"carriagereturn",
+         "value":9
+      },
+      {  
+         "type":"carriagereturn",
+         "value":10
+      },
+      {  
+         "type":"name",
+         "value":"import"
+      },
+      {  
+         "type":"string",
+         "value":"./index.css"
+      },
+      {  
+         "type":"statementSeperator",
+         "value":";"
+      },
+      {  
+         "type":"carriagereturn",
+         "value":11
+      },
+      {  
+         "type":"carriagereturn",
+         "value":12
+      },
+      {  
+         "type":"declaration",
+         "value":[  
+            {  
+               "type":"name",
+               "value":"store"
+            },
+            {  
+               "type":"operator",
+               "value":"="
+            },
+            {  
+               "type":"name",
+               "value":"createStore"
+            },
+            {  
+               "type":"params",
+               "value":[  
+                  {  
+                     "type":"name",
+                     "value":"reducers"
+                  }
+               ]
+            }
+         ]
+      },
+      {  
+         "type":"carriagereturn",
+         "value":13
+      },
+      {  
+         "type":"name",
+         "value":"ReactDOM.render"
+      },
+      {  
+         "type":"params",
+         "value":[  
+            {  
+               "type":"carriagereturn",
+               "value":14
+            },
+            {  
+               "type":"operator",
+               "value":"<"
+            },
+            {  
+               "type":"name",
+               "value":"div"
+            },
+            {  
+               "type":"name",
+               "value":"className"
+            },
+            {  
+               "type":"operator",
+               "value":"="
+            },
+            {  
+               "type":"string",
+               "value":"ui container"
+            },
+            {  
+               "type":"name",
+               "value":"style"
+            },
+            {  
+               "type":"operator",
+               "value":"="
+            },
+            {  
+               "type":"codeblock",
+               "value":[  
+                  {  
+                     "type":"codeblock",
+                     "value":[  
+                        {  
+                           "type":"name",
+                           "value":"marginTop"
+                        },
+                        {  
+                           "type":"operator",
+                           "value":":"
+                        },
+                        {  
+                           "type":"string",
+                           "value":"3em"
+                        }
+                     ]
+                  }
+               ]
+            },
+            {  
+               "type":"operator",
+               "value":">"
+            },
+            {  
+               "type":"carriagereturn",
+               "value":15
+            },
+            {  
+               "type":"operator",
+               "value":"<"
+            },
+            {  
+               "type":"name",
+               "value":"OfflineMode"
+            },
+            {  
+               "type":"name",
+               "value":"saveName"
+            },
+            {  
+               "type":"operator",
+               "value":"="
+            },
+            {  
+               "type":"string",
+               "value":"MOOSE_FILE"
+            },
+            {  
+               "type":"name",
+               "value":"store"
+            },
+            {  
+               "type":"operator",
+               "value":"="
+            },
+            {  
+               "type":"codeblock",
+               "value":[  
+                  {  
+                     "type":"name",
+                     "value":"store"
+                  }
+               ]
+            },
+            {  
+               "type":"operator",
+               "value":"/"
+            },
+            {  
+               "type":"operator",
+               "value":">"
+            },
+            {  
+               "type":"carriagereturn",
+               "value":16
+            },
+            {  
+               "type":"operator",
+               "value":"<"
+            },
+            {  
+               "type":"name",
+               "value":"Provider"
+            },
+            {  
+               "type":"name",
+               "value":"store"
+            },
+            {  
+               "type":"operator",
+               "value":"="
+            },
+            {  
+               "type":"codeblock",
+               "value":[  
+                  {  
+                     "type":"name",
+                     "value":"store"
+                  }
+               ]
+            },
+            {  
+               "type":"operator",
+               "value":">"
+            },
+            {  
+               "type":"carriagereturn",
+               "value":17
+            },
+            {  
+               "type":"operator",
+               "value":"<"
+            },
+            {  
+               "type":"name",
+               "value":"App"
+            },
+            {  
+               "type":"operator",
+               "value":"/"
+            },
+            {  
+               "type":"operator",
+               "value":">"
+            },
+            {  
+               "type":"carriagereturn",
+               "value":18
+            },
+            {  
+               "type":"operator",
+               "value":"<"
+            },
+            {  
+               "type":"operator",
+               "value":"/"
+            },
+            {  
+               "type":"name",
+               "value":"Provider"
+            },
+            {  
+               "type":"operator",
+               "value":">"
+            },
+            {  
+               "type":"carriagereturn",
+               "value":19
+            },
+            {  
+               "type":"operator",
+               "value":"<"
+            },
+            {  
+               "type":"operator",
+               "value":"/"
+            },
+            {  
+               "type":"name",
+               "value":"div"
+            },
+            {  
+               "type":"operator",
+               "value":">"
+            },
+            {  
+               "type":"seperator",
+               "value":","
+            },
+            {  
+               "type":"name",
+               "value":"document.getElementById"
+            },
+            {  
+               "type":"params",
+               "value":[  
+                  {  
+                     "type":"string",
+                     "value":"root"
+                  }
+               ]
+            }
+         ]
+      },
+      {  
+         "type":"statementSeperator",
+         "value":";"
+      }
+   ],
+   "current":559
+}
 ```

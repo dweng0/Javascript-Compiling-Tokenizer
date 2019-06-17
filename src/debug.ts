@@ -20,7 +20,6 @@ const Test = class {
                     }
                     console.log("The file was saved!");
                 }); 
-                debugger;
             }
         });
     }
