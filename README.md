@@ -247,6 +247,7 @@ the AST
 
 ```json
    {
+   {
     "tokens": [{
         "type": "carriagereturn",
         "value": 1
@@ -259,12 +260,48 @@ the AST
             "type": "assigner",
             "value": "="
         }, {
-            "type": "string",
+            "type": "stringLiteral",
             "value": "something ${1 + 2 + 3}"
         }]
+    }, {
+        "type": "carriagereturn",
+        "value": 2
+    }, {
+        "type": "const",
+        "value": [{
+            "type": "name",
+            "value": "string"
+        }, {
+            "type": "number",
+            "value": "2"
+        }, {
+            "type": "assigner",
+            "value": "="
+        }, {
+            "type": "stringLiteral",
+            "value": "something ${(true) ? 'x' : 'y'}"
+        }]
+    }, {
+        "type": "carriagereturn",
+        "value": 3
+    }, {
+        "type": "const",
+        "value": [{
+            "type": "name",
+            "value": "string"
+        }, {
+            "type": "number",
+            "value": "3"
+        }, {
+            "type": "assigner",
+            "value": "="
+        }, {
+            "type": "stringLiteral",
+            "value": "something\nanother ${'x'}\nnew line ${1 + 2 + 3}\ntest"
+        }]
     }],
-    "current": null
-   }
+    "current": 163
+}
 ```
 
 
