@@ -87,6 +87,11 @@ The tokenizer will recurse in the following conditions:
 ## Examples
 > There are more examples of this being used on a react file, normal js file and a file containing the 'old' 'defines' method to import things in ```./tests/beforeandafter```
 
+## Gotchas
+
+- This tokenizer wont parse files correctly if variables are not declared properly. If you declare variables without a declaration statement such as ```const```, ```var```, ```let```. Then this tokenizer is not for you.
+- Parser doesn't support comma separated declarations. ```let var1,var2,var3,var4;``` will not parse correctly.
+
 #### Some regex
 
 ``` js
