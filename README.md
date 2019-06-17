@@ -78,14 +78,16 @@ Third party lexical checks are always performed first.
 
 documentation on the AST layout
 
+### Dev notes
+
 The tokenizer will recurse in the following conditions:
 
 - if it finds an opening parenthesis ```(```
 - if it finds an opening code block ```{```
 - if it finds an opening array ```[```
-- if it finds a declaration ``` const, let, var new ```
+- if it finds a declaration ``` const, let, var ```
 
-The code generate will consist of:
+The code generated will consist of:
 
 ```
 TODO
