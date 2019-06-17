@@ -24,8 +24,13 @@ interface IThirdPartyParsingResult {
     currentCursorPosition: number
 }
 
+export class Generator {
+    start() {
 
-export default class LexicalAnalyzer {
+    }
+}
+
+export class LexicalAnalyzer {
     verbose: boolean = false;
     lineNumber: number = 0;
     assigner: boolean = false;
@@ -127,18 +132,18 @@ export default class LexicalAnalyzer {
                 let newLine = false;
                 if (EOL.test(char)) {
                     this.lineNumber = (this.lineNumber + 1);
-                    tokens.push({ type: 'eol', value: this.lineNumber });
+                    tokens.push({ type: 'eol', value: char});
                     newLine = true;
                 }
                 if(CARRIAGE_RETURN.test(char))
                 {
                     this.lineNumber = (this.lineNumber + 1);
-                    tokens.push({ type: 'carriagereturn', value: this.lineNumber });
+                    tokens.push({ type: 'carriagereturn', value: char });
                     newLine = true;
                 }
                 return newLine;
             }
-           
+
             //test for cr and lf
             if(isNewLine(char))
             {
@@ -253,7 +258,7 @@ export default class LexicalAnalyzer {
                 this.assigner = false;
                 continue;
             }
-            
+
             if (char === ',') {
                 tokens.push({ type: 'seperator', value: char });
                 char = input[++current];
