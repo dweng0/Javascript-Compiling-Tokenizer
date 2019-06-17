@@ -89,7 +89,7 @@ The tokenizer will recurse in the following conditions:
 
 
 ## Examples
-There are more examples of this being used on a react file, normal js file and a file containing the 'old' 'defines' method to import things in ```./tests/beforeandafter```
+> There are more examples of this being used on a react file, normal js file and a file containing the 'old' 'defines' method to import things in ```./tests/beforeandafter```
 
 #### A class
 ``` js
