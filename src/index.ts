@@ -6,13 +6,29 @@ const WHITESPACE = /\s/;
 const NUMBERS = /[0-9]/;
 const DECLARABLE_CHARACTERS = /[A-Za-z_.$]/i;
 
+
+interface IPayload {
+    type: string,
+    value: any
+}
+
+interface IThirdPartyParsingResult {
+    payload: IPayload,
+    currentCursorPosition: number
+}
+
+
 export default class LexicalAnalyzer {
     verbose: boolean = false;
+    lineNumber: number = 0;
+    thirdPartyParsingTests: Array<(char: string, current: number, input: string) => IThirdPartyParsingResult> = [];
+
     log(message: string) {
         if (this.verbose) {
             return this.log(message);
         }
     }
+
     constructor(options) {
         if(_.isEmpty(options))
         {
@@ -22,16 +38,21 @@ export default class LexicalAnalyzer {
         if (options.verbose) {
             this.verbose = true;
         }
-    }
-    start(input, current, exitOn) {
 
+        if(options.thirdPartyParsingTests && options.thirdPartyParsingTests.length > 0)
+        {
+            this.thirdPartyParsingTests = [...this.thirdPartyParsingTests, options.thirdPartyParsingTests];
+        }
+    }
+    start(input, current?, exitOn?) {
+        debugger;
         if(!input)
         {
             throw new Error('No Input string provided');
         }
 
         current = current || 0;
-        let tokens = [];
+        let tokens = Array<IPayload>();
         let char = input[current];
 
         while (current < input.length) {
@@ -79,8 +100,11 @@ export default class LexicalAnalyzer {
                 continue;
             }
 
+            //we want to record the lines
             if (NEW_LINE.test(char)) {
                 current++;
+                this.lineNumber = (this.lineNumber + 1);
+                tokens.push({type: 'newline', value: this.lineNumber});
                 continue;
             }
 
@@ -106,7 +130,7 @@ export default class LexicalAnalyzer {
                 input,
                 current
             );
-            if (!_.isEmpty(doubleQuotedString)) {
+            if (doubleQuotedString.type) {
                 tokens.push(_.pick(doubleQuotedString, 'type', 'value'));
                 current = doubleQuotedString.current;
                 char = input[current];
@@ -118,7 +142,7 @@ export default class LexicalAnalyzer {
                 input,
                 current
             );
-            if (!_.isEmpty(singleQuotedString)) {
+            if (singleQuotedString.type) {
                 tokens.push(_.pick(singleQuotedString, 'type', 'value'));
                 current = singleQuotedString.current;
                 char = input[current];
@@ -163,8 +187,8 @@ export default class LexicalAnalyzer {
                 continue;
             }
             if (char === ';') {
-                this.log(colors.yellow("newline" + char));
-                tokens.push({ type: 'newLine', value: char });
+                this.log(colors.yellow("end of line" + char));
+                tokens.push({ type: 'statementSeperator', value: char });
                 char = input[++current];
                 continue;
             }
@@ -225,6 +249,27 @@ export default class LexicalAnalyzer {
                     }
             }
 
+            if(!_.isEmpty(this.thirdPartyParsingTests))
+            {
+                let thirdPartyTokens = Array<IPayload>();
+                this.thirdPartyParsingTests.forEach(test => {
+                    let result = test(char, current, input);
+                    if(result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value) )
+                    {
+                        if(!result.currentCursorPosition)
+                        {
+                            throw new Error('Third party parsing function must return the new cursor position');
+                        }
+
+                        tokens.push(result.payload);
+                        current = result.currentCursorPosition;
+                    }
+                    else
+                    {
+                        this.log('third party function returned no results, continuing');
+                    }
+                });
+            }
             //finally, people end their code in different ways, we log ; because there's a chance its the last 'thing'
             this.log(colors.red(`DEBUG current curser ${current}, last cursor ${input.length} current char ${char}, recursive exit condition is ${exitOn}`));
             throw new TypeError('unknown var type: ' + char);
@@ -246,7 +291,7 @@ export default class LexicalAnalyzer {
             char = input[++current];
             return { type: 'string', value, current };
         }
-        return {};
+        return {type: '', value: ''}
     }
 
     maybeSingleQuotedStringCheck(char, input, current) {
@@ -263,6 +308,6 @@ export default class LexicalAnalyzer {
             char = input[++current];
             return { type: 'string', value, current };
         }
-        return {};
+        return {type: '', value: ''}
     }
 }

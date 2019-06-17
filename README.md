@@ -48,6 +48,32 @@ Test it
     npm test
 ```
 
+options
+
+```
+{
+    verbose: boolean //will log to console
+    thirdPartyParsingTests: Array<(char: string, current: number, input: string) => IThirdPartyParsingResult> = [];
+}
+```
+
+## Injecting your own third party lexical checks
+Its as simple as providing an array of functions. The functions are given the following arguments: <br/><br/>
+``` char:string, current:number, input:string ``` 
+
+char is the string at the current position, current is the index of the current position in the input string and input is a stringified version of the whole file.
+
+The function must return an object ```(IThirdPartyParsingResult)``` containing:
+
+```
+{
+    payload: {type: 'coolnew type', value: 'the value'} //the token
+    current: number //new cursor position after going through this function
+}
+```
+
+Third party lexical checks are always performed first.
+
 ## Coming soon
 
 documentation on the AST layout
