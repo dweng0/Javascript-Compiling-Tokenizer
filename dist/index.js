@@ -151,9 +151,10 @@ var LexicalAnalyzer = /** @class */ (function () {
                 this.assigner = false;
                 continue;
             }
+            //declarations must start with a alpha character, however, afterwards it can contain numbers (check the while decl)
             if (DECLARABLE_CHARACTERS.test(char)) {
                 var value = '';
-                while (DECLARABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
+                while (DECLARABLE_CHARACTERS.test(char) && !_.isUndefined(char) || NUMBERS.test(char) && !_.isUndefined(char)) {
                     value += char;
                     char = input[++current];
                 }
