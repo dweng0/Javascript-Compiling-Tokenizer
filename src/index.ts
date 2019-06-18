@@ -7,13 +7,14 @@ const EOL = /\r/;
 const WHITESPACE = /\s/;
 
 /**
- * Any char thats not a whitespace and not ;
+ * Any assignable character
  */
-const ASSIGNABLE_CHARACTERS = /[^\s,^;]/;
+const ASSIGNABLE_CHARACTERS = /[^\s\n\t\r;(){}[\]=]/;
 
-const NUMBERS = /[0-9]/;
-
-const DECLARABLE_CHARACTERS = /[A-Za-z_.$]/i;
+/**
+ * Match all special characters except underscore and semicolon... and whitespace.. and tabs... and newlines
+ */
+const SPECIAL_CHARACTERS = /[^a-zA-Z0-9_;\s\n\t\r]/;
 
 interface IPayload {
     type: string,
@@ -27,60 +28,57 @@ interface IThirdPartyParsingResult {
 
 //Generate code from the lexer
 export class Generator {
-    start(tokens:Array<IPayload>): string {
+    start(tokens: Array<IPayload>): string {
         return tokens.reduce((content, token) => {
-        switch(token.type)
-        {
-            case "operator":
-            case "assigner":
-            case "seperator":
-            case "number":
-            case "name":
-            {
-                return content += `${token.value} `;
+            //check operator positioning
+            switch (token.type) {
+                case "assigner":
+                case "seperator":
+                case "operator":
+                    {
+                        return content += `${token.value} `;
+                    }
+                case "number":
+                case "name":
+                case "tab":
+                case "eol":
+                case "carriagereturn":
+                case "string":
+                case "stringLiteral":
+                case "assignee":
+                case "statementseperator":
+                case "inlinecomment":
+                    {
+                        return content += token.value;
+                    }
+                case "multilinecomment":
+                    {
+                        return content += `/** ${token.value} */`;
+                    }
+                case "const":
+                case "var":
+                case "let":
+                    {
+                        return content += `${token.type} ${this.start(token.value)}`;
+                    }
+                case "params":
+                    {
+                        return content += `(${this.start(token.value)})`;
+                    }
+                case "array":
+                    {
+                        return content += `[${this.start(token.value)}]`;
+                    }
+                case "codeblock":
+                    {
+                        return content += `{${this.start(token.value)}}`;
+                    }
+                default:
+                    {
+                        throw new TypeError('Unable to parse unknown type' + token.type);
+                    }
             }
-            case "tab":
-            case "eol":
-            case "carriagereturn":
-            case "string":
-            case "stringLiteral":
-            case "assignee":
-            case "statementseperator":
-            {
-                return content += token.value;
-            }
-            case "multilinecomment":
-            {
-                return content += `/** ${token.value} */`;
-            }
-            case "inlinecomment":
-            {
-                return content += '//' + token.value;
-            }
-            case "const":
-            case "var":
-            case "let":
-            {
-                return content += `${token.type} ${this.start(token.value)}`;
-            }
-            case "params":
-            {
-                return content += `(${this.start(token.value)})`;
-            }
-            case "array":
-            {
-                return content += `[${this.start(token.value)}]`;
-            }
-            case "codeblock":
-            {
-                return content += `{${this.start(token.value)}}`;
-            }
-            default:
-            {
-                throw new TypeError('Unable to parse unknown type' + token.type);
-            }
-        }
-        },"");
+        }, "");
     }
 }
 
@@ -122,12 +120,10 @@ export class LexicalAnalyzer {
         while (current < input.length) {
 
             char = input[current];
-
+            this.log(colors.bgYellow(`Checking: ${char}`));
             if (char === exitOn) {
                 this.log(colors.yellow(`exiting ${exitOn}`));
-                if(exitOn === ';')
-                {
-                    this.log(colors.yellow(`exit on ${char}`));
+                if (exitOn === ';') {
                     tokens.push({ type: 'statementseperator', value: char });
                 }
                 if (exitOn === "}" && input[current + 1] === ';') {
@@ -138,6 +134,7 @@ export class LexicalAnalyzer {
             }
 
             if (!_.isEmpty(this.thirdPartyParsingTests)) {
+                this.log(colors.bgYellow(`Enter thirdparty ${char}`));
                 this.thirdPartyParsingTests.forEach(test => {
                     let result = test(char, current, input);
                     if (result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value)) {
@@ -155,6 +152,7 @@ export class LexicalAnalyzer {
             }
             //paren
             if (char === '(') {
+                this.log(colors.bgYellow(`Enter ${char}`));
                 this.log(colors.yellow("entering " + char));
                 char = input[++current];
                 let results = this.start(input, current, ')');
@@ -166,7 +164,7 @@ export class LexicalAnalyzer {
 
             //arr
             if (char === '[') {
-                this.log(colors.yellow("entering " + char));
+                this.log(colors.bgYellow(`Enter ${char}`));
                 char = input[++current];
                 let results = this.start(input, current, ']');
                 tokens.push({ type: 'array', value: results.tokens });
@@ -177,7 +175,7 @@ export class LexicalAnalyzer {
 
             //body
             if (char === '{') {
-                this.log(colors.yellow("entering " + char));
+                this.log(colors.bgYellow(`Enter ${char}`));
                 char = input[++current];
                 let results = this.start(input, current, '}');
                 tokens.push({ type: 'codeblock', value: results.tokens });
@@ -187,30 +185,31 @@ export class LexicalAnalyzer {
             }
 
             const isNewLine = (char) => {
+                this.log(colors.bgYellow(`Newline check ${char}`));
                 let newLine = false;
                 if (EOL.test(char)) {
                     this.lineNumber = (this.lineNumber + 1);
-                    tokens.push({ type: 'eol', value: char});
+                    tokens.push({ type: 'eol', value: char });
                     newLine = true;
                 }
-                if(CARRIAGE_RETURN.test(char))
-                {
+                if (CARRIAGE_RETURN.test(char)) {
                     this.lineNumber = (this.lineNumber + 1);
                     tokens.push({ type: 'carriagereturn', value: char });
                     newLine = true;
                 }
+                this.log(colors.bgYellow(`Newline: ${newLine}`));
                 return newLine;
             }
 
             //test for cr and lf
-            if(isNewLine(char))
-            {
+            if (isNewLine(char)) {
                 current++;
                 continue;
             }
 
-            if(TAB.test(char)) {
-                tokens.push({ type: 'tab', value: char});
+            if (TAB.test(char)) {
+
+                tokens.push({ type: 'tab', value: '\t' });
                 current++;
                 continue;
             }
@@ -253,8 +252,7 @@ export class LexicalAnalyzer {
                 input,
                 current
             );
-            if(backTickString.type)
-            {
+            if (backTickString.type) {
                 tokens.push(_.pick(backTickString, 'type', 'value'));
                 current = backTickString.current;
                 char = input[current];
@@ -262,44 +260,25 @@ export class LexicalAnalyzer {
                 continue;
             }
 
-            //declarations must start with a alpha character, however, afterwards it can contain numbers (check the while decl)
-            if (DECLARABLE_CHARACTERS.test(char)) {
-                let value = '';
-                while (DECLARABLE_CHARACTERS.test(char) && !_.isUndefined(char) || NUMBERS.test(char) && !_.isUndefined(char)) {
-                    value += char;
-                    char = input[++current];
-                }
-                this.log(colors.bgCyan(value));
-
-                //check name for reserved
-                switch (value) {
-                    case "const":
-                    case "var":
-                    case "let":
-                        {
-                            this.log(colors.yellow("entering " + char));
-                            const results = this.start(input, current, ';');
-                            tokens.push({ type: value, value: results.tokens });
-                            current = results.current;
-                            char = input[++current];
-                            break;
-                        }
-                    default:
-                        {
-                            let type = (this.assigner) ? 'assignee' : 'name';
-                            this.assigner = false;
-                            tokens.push({ type, value });
-                            break;
-                        }
-                }
-                continue;
-            }
 
             //check for assignment call
             if (char === "=") {
-                tokens.push({ type: 'assigner', value: char });
+                let newCurrent = (current + 1)
+                let token = { type: 'assigner', value: char };
+                //if the next char is '=' then its an equality check
+                if (input[current + 1] === '=') {
+                    newCurrent = (newCurrent + 1);
+                    let equalityComparator = char + '=';
+                    if (input[current + 2] === '=') {
+                        equalityComparator += "=";
+                        newCurrent = (newCurrent + 1);
+                    }
+                    token.type = 'operator';
+                    token.value = equalityComparator;
+                }
+                current = newCurrent;
+                tokens.push(token);
                 this.assigner = true;
-                char = input[++current];
                 continue;
             }
 
@@ -336,7 +315,6 @@ export class LexicalAnalyzer {
                     char = input[++current];
                 }
                 tokens.push({ type: 'inlinecomment', value });
-                current++;
                 continue;
             }
 
@@ -357,37 +335,51 @@ export class LexicalAnalyzer {
                 continue;
             }
 
-            if(char === "=")
-            {
-                tokens.push({type: 'assigner', value: char});
-                this.assigner = true;
+            //check for operators
+            if (SPECIAL_CHARACTERS.test(char)) {
+                let value = '';
+                const type = 'operator';
+                while (SPECIAL_CHARACTERS.test(char) && !_.isUndefined(char)) {
+                    value += char;
+                    char = input[++current];
+                }
+                tokens.push({ type, value });
                 continue;
             }
+            //declarations must start with a alpha character, however, afterwards it can contain numbers (check the while decl)
+            if (ASSIGNABLE_CHARACTERS.test(char)) {
+                let value = '';
+                while (ASSIGNABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
+                    value += char;
+                    char = input[++current];
+                }
+                this.log(colors.bgCyan(value));
 
-            //operators
-            switch (char) {
-                case "<":
-                case ">":
-                case "&":
-                case "|":
-                case "!":
-                case "%":
-                case "+":
-                case "-":
-                case "/":
-                case "*":
-                case ">":
-                case ">":
-                case "~":
-                case "^":
-                case "?":
-                case ":":
-                case ".":
-                    {
-                        tokens.push({ type: 'operator', value: char });
-                        current++;
-                        continue;
-                    }
+                //check name for reserved
+                switch (value) {
+                    case "const":
+                    case "var":
+                    case "let":
+                        {
+                            this.log(colors.yellow("entering " + char));
+                            const results = this.start(input, current, ';');
+                            tokens.push({ type: value, value: results.tokens });
+                            current = results.current;
+                            char = input[++current];
+                            break;
+                        }
+                    default:
+                        {
+                            let type = (this.assigner) ? 'assignee' : 'name';
+                            this.assigner = false;
+                            //check for space after the char and apply to value if there
+                            value = (WHITESPACE.test(input[current])) ? value + ' ' : value;
+                            console.log(`whitespace for ${value}?`, WHITESPACE.test(input[current]));
+                            tokens.push({ type, value });
+                            break;
+                        }
+                }
+                continue;
             }
 
             this.log(colors.red(`DEBUG current curser ${current}, last cursor ${input.length} current char ${char}, recursive exit condition is ${exitOn}`));
@@ -396,8 +388,8 @@ export class LexicalAnalyzer {
         return { tokens, current };
     }
     maybeBackTickStringCheck(char: string, input: string, current: number) {
-            const BACK_TICK = /`/
-           if (BACK_TICK.test(char)) {
+        const BACK_TICK = /`/
+        if (BACK_TICK.test(char)) {
             let value = "`";
             char = input[++current];
             while (!BACK_TICK.test(char)) {
@@ -412,7 +404,7 @@ export class LexicalAnalyzer {
     }
     stringConditional(condition, char, input, current) {
 
-         // capture the quotes and the value inside  double/single quotes
+        // capture the quotes and the value inside  double/single quotes
         if (char === condition) {
 
             let value = condition;

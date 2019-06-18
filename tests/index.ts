@@ -149,7 +149,7 @@ describe('Generator tests', () => {
         const token = { type: 'const', value: [
             {
                 type:'name',
-                value: 'test'
+                value: 'test '
             },
             {
                 type:'assigner',

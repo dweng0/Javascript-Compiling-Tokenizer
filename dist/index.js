@@ -7,11 +7,13 @@ var TAB = /\t/;
 var EOL = /\r/;
 var WHITESPACE = /\s/;
 /**
- * Any char thats not a whitespace and not ;
+ * Any assignable character
  */
-var ASSIGNABLE_CHARACTERS = /[^\s,^;]/;
-var NUMBERS = /[0-9]/;
-var DECLARABLE_CHARACTERS = /[A-Za-z_.$]/i;
+var ASSIGNABLE_CHARACTERS = /[^\s\n\t\r;(){}[\]=]/;
+/**
+ * Match all special characters except underscore and semicolon... and whitespace.. and tabs... and newlines
+ */
+var SPECIAL_CHARACTERS = /[^a-zA-Z0-9_;\s\n\t\r]/;
 //Generate code from the lexer
 var Generator = /** @class */ (function () {
     function Generator() {
@@ -19,15 +21,16 @@ var Generator = /** @class */ (function () {
     Generator.prototype.start = function (tokens) {
         var _this = this;
         return tokens.reduce(function (content, token) {
+            //check operator positioning
             switch (token.type) {
-                case "operator":
                 case "assigner":
                 case "seperator":
-                case "number":
-                case "name":
+                case "operator":
                     {
                         return content += token.value + " ";
                     }
+                case "number":
+                case "name":
                 case "tab":
                 case "eol":
                 case "carriagereturn":
@@ -35,16 +38,13 @@ var Generator = /** @class */ (function () {
                 case "stringLiteral":
                 case "assignee":
                 case "statementseperator":
+                case "inlinecomment":
                     {
                         return content += token.value;
                     }
                 case "multilinecomment":
                     {
                         return content += "/** " + token.value + " */";
-                    }
-                case "inlinecomment":
-                    {
-                        return content += '//' + token.value;
                     }
                 case "const":
                 case "var":
@@ -105,10 +105,10 @@ var LexicalAnalyzer = /** @class */ (function () {
         var char = input[current];
         while (current < input.length) {
             char = input[current];
+            this.log(colors.bgYellow("Checking: " + char));
             if (char === exitOn) {
                 this.log(colors.yellow("exiting " + exitOn));
                 if (exitOn === ';') {
-                    this.log(colors.yellow("exit on " + char));
                     tokens.push({ type: 'statementseperator', value: char });
                 }
                 if (exitOn === "}" && input[current + 1] === ';') {
@@ -117,6 +117,7 @@ var LexicalAnalyzer = /** @class */ (function () {
                 break;
             }
             if (!_.isEmpty(this.thirdPartyParsingTests)) {
+                this.log(colors.bgYellow("Enter thirdparty " + char));
                 this.thirdPartyParsingTests.forEach(function (test) {
                     var result = test(char, current, input);
                     if (result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value)) {
@@ -133,6 +134,7 @@ var LexicalAnalyzer = /** @class */ (function () {
             }
             //paren
             if (char === '(') {
+                this.log(colors.bgYellow("Enter " + char));
                 this.log(colors.yellow("entering " + char));
                 char = input[++current];
                 var results = this.start(input, current, ')');
@@ -143,7 +145,7 @@ var LexicalAnalyzer = /** @class */ (function () {
             }
             //arr
             if (char === '[') {
-                this.log(colors.yellow("entering " + char));
+                this.log(colors.bgYellow("Enter " + char));
                 char = input[++current];
                 var results = this.start(input, current, ']');
                 tokens.push({ type: 'array', value: results.tokens });
@@ -153,7 +155,7 @@ var LexicalAnalyzer = /** @class */ (function () {
             }
             //body
             if (char === '{') {
-                this.log(colors.yellow("entering " + char));
+                this.log(colors.bgYellow("Enter " + char));
                 char = input[++current];
                 var results = this.start(input, current, '}');
                 tokens.push({ type: 'codeblock', value: results.tokens });
@@ -162,6 +164,7 @@ var LexicalAnalyzer = /** @class */ (function () {
                 continue;
             }
             var isNewLine = function (char) {
+                _this.log(colors.bgYellow("Newline check " + char));
                 var newLine = false;
                 if (EOL.test(char)) {
                     _this.lineNumber = (_this.lineNumber + 1);
@@ -173,6 +176,7 @@ var LexicalAnalyzer = /** @class */ (function () {
                     tokens.push({ type: 'carriagereturn', value: char });
                     newLine = true;
                 }
+                _this.log(colors.bgYellow("Newline: " + newLine));
                 return newLine;
             };
             //test for cr and lf
@@ -213,42 +217,24 @@ var LexicalAnalyzer = /** @class */ (function () {
                 this.assigner = false;
                 continue;
             }
-            //declarations must start with a alpha character, however, afterwards it can contain numbers (check the while decl)
-            if (DECLARABLE_CHARACTERS.test(char)) {
-                var value = '';
-                while (DECLARABLE_CHARACTERS.test(char) && !_.isUndefined(char) || NUMBERS.test(char) && !_.isUndefined(char)) {
-                    value += char;
-                    char = input[++current];
-                }
-                this.log(colors.bgCyan(value));
-                //check name for reserved
-                switch (value) {
-                    case "const":
-                    case "var":
-                    case "let":
-                        {
-                            this.log(colors.yellow("entering " + char));
-                            var results = this.start(input, current, ';');
-                            tokens.push({ type: value, value: results.tokens });
-                            current = results.current;
-                            char = input[++current];
-                            break;
-                        }
-                    default:
-                        {
-                            var type = (this.assigner) ? 'assignee' : 'name';
-                            this.assigner = false;
-                            tokens.push({ type: type, value: value });
-                            break;
-                        }
-                }
-                continue;
-            }
             //check for assignment call
             if (char === "=") {
-                tokens.push({ type: 'assigner', value: char });
+                var newCurrent = (current + 1);
+                var token = { type: 'assigner', value: char };
+                //if the next char is '=' then its an equality check
+                if (input[current + 1] === '=') {
+                    newCurrent = (newCurrent + 1);
+                    var equalityComparator = char + '=';
+                    if (input[current + 2] === '=') {
+                        equalityComparator += "=";
+                        newCurrent = (newCurrent + 1);
+                    }
+                    token.type = 'operator';
+                    token.value = equalityComparator;
+                }
+                current = newCurrent;
+                tokens.push(token);
                 this.assigner = true;
-                char = input[++current];
                 continue;
             }
             //if we have an assignment flag, then push any non whitespace chars into a new token until we reach a whitespace
@@ -282,7 +268,6 @@ var LexicalAnalyzer = /** @class */ (function () {
                     char = input[++current];
                 }
                 tokens.push({ type: 'inlinecomment', value: value });
-                current++;
                 continue;
             }
             //multi line comment, should be two astrix, but since ...some people... use /* instead of  /**, we catch both
@@ -301,35 +286,50 @@ var LexicalAnalyzer = /** @class */ (function () {
                 current = (current + 2);
                 continue;
             }
-            if (char === "=") {
-                tokens.push({ type: 'assigner', value: char });
-                this.assigner = true;
+            //check for operators
+            if (SPECIAL_CHARACTERS.test(char)) {
+                var value = '';
+                var type = 'operator';
+                while (SPECIAL_CHARACTERS.test(char) && !_.isUndefined(char)) {
+                    value += char;
+                    char = input[++current];
+                }
+                tokens.push({ type: type, value: value });
                 continue;
             }
-            //operators
-            switch (char) {
-                case "<":
-                case ">":
-                case "&":
-                case "|":
-                case "!":
-                case "%":
-                case "+":
-                case "-":
-                case "/":
-                case "*":
-                case ">":
-                case ">":
-                case "~":
-                case "^":
-                case "?":
-                case ":":
-                case ".":
-                    {
-                        tokens.push({ type: 'operator', value: char });
-                        current++;
-                        continue;
-                    }
+            //declarations must start with a alpha character, however, afterwards it can contain numbers (check the while decl)
+            if (ASSIGNABLE_CHARACTERS.test(char)) {
+                var value = '';
+                while (ASSIGNABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
+                    value += char;
+                    char = input[++current];
+                }
+                this.log(colors.bgCyan(value));
+                //check name for reserved
+                switch (value) {
+                    case "const":
+                    case "var":
+                    case "let":
+                        {
+                            this.log(colors.yellow("entering " + char));
+                            var results = this.start(input, current, ';');
+                            tokens.push({ type: value, value: results.tokens });
+                            current = results.current;
+                            char = input[++current];
+                            break;
+                        }
+                    default:
+                        {
+                            var type = (this.assigner) ? 'assignee' : 'name';
+                            this.assigner = false;
+                            //check for space after the char and apply to value if there
+                            value = (WHITESPACE.test(input[current])) ? value + ' ' : value;
+                            console.log("whitespace for " + value + "?", WHITESPACE.test(input[current]));
+                            tokens.push({ type: type, value: value });
+                            break;
+                        }
+                }
+                continue;
             }
             this.log(colors.red("DEBUG current curser " + current + ", last cursor " + input.length + " current char " + char + ", recursive exit condition is " + exitOn));
             throw new TypeError('unknown var type: ' + char);
