@@ -277,7 +277,9 @@ export class LexicalAnalyzer {
                         }
                     default:
                         {
-                            tokens.push({ type: 'name', value: value });
+                            let type = (this.assigner) ? 'assignee' : 'name';
+                            this.assigner = false;
+                            tokens.push({ type, value });
                             break;
                         }
                 }
@@ -292,7 +294,7 @@ export class LexicalAnalyzer {
                 continue;
             }
 
-            //if we have an assignment flag, then push any non whiespace chars into a new token until we reach a whitespace
+            //if we have an assignment flag, then push any non whitespace chars into a new token until we reach a whitespace
             if (this.assigner && ASSIGNABLE_CHARACTERS.test(char)) {
                 let value = '';
                 while (ASSIGNABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {

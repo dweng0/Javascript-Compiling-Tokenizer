@@ -115,6 +115,23 @@ describe('Lexer tests', () => {
         expect(result.type).to.have.string('carriagereturn');
     });
 
+    it('should be an assigner', () =>{
+        const js= '=';
+        const result = lexer({verbose:false}).start(js).tokens[0];
+        expect(result.type).to.have.string('assigner');
+    });
+
+    it('should be an assignee', () =>{
+        const js= '= _.thing';
+        const result = lexer({verbose:false}).start(js).tokens[1];
+        expect(result.type).to.have.string('assignee');
+    });
+
+    it('should be a string', () =>{
+        const js= '= "thing"';
+        const result = lexer({verbose:false}).start(js).tokens[1];
+        expect(result.type).to.have.string('string');
+    });
 
 }); 
 
