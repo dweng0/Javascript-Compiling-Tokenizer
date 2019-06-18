@@ -25,10 +25,10 @@ var Generator = /** @class */ (function () {
             switch (token.type) {
                 case "assigner":
                 case "seperator":
-                case "operator":
                     {
                         return content += token.value + " ";
                     }
+                case "operator":
                 case "number":
                 case "name":
                 case "tab":
@@ -44,7 +44,7 @@ var Generator = /** @class */ (function () {
                     }
                 case "multilinecomment":
                     {
-                        return content += "/** " + token.value + " */";
+                        return content += token.value + "*/ ";
                     }
                 case "const":
                 case "var":
@@ -185,7 +185,7 @@ var LexicalAnalyzer = /** @class */ (function () {
                 continue;
             }
             if (TAB.test(char)) {
-                tokens.push({ type: 'tab', value: char });
+                tokens.push({ type: 'tab', value: '\t' });
                 current++;
                 continue;
             }
@@ -230,7 +230,7 @@ var LexicalAnalyzer = /** @class */ (function () {
                         newCurrent = (newCurrent + 1);
                     }
                     token.type = 'operator';
-                    token.value = equalityComparator;
+                    token.value = (WHITESPACE.test(input[newCurrent])) ? equalityComparator + ' ' : equalityComparator;
                 }
                 current = newCurrent;
                 tokens.push(token);
@@ -272,7 +272,7 @@ var LexicalAnalyzer = /** @class */ (function () {
             }
             //multi line comment, should be two astrix, but since ...some people... use /* instead of  /**, we catch both
             if (char === "/" && input[current + 1] === "*") {
-                var value = '';
+                var value = '/';
                 var closing = "*/";
                 var aheadText = '';
                 char = input[current + 3];
@@ -294,6 +294,7 @@ var LexicalAnalyzer = /** @class */ (function () {
                     value += char;
                     char = input[++current];
                 }
+                value = (WHITESPACE.test(input[current])) ? value + ' ' : value;
                 tokens.push({ type: type, value: value });
                 continue;
             }
@@ -324,7 +325,6 @@ var LexicalAnalyzer = /** @class */ (function () {
                             this.assigner = false;
                             //check for space after the char and apply to value if there
                             value = (WHITESPACE.test(input[current])) ? value + ' ' : value;
-                            console.log("whitespace for " + value + "?", WHITESPACE.test(input[current]));
                             tokens.push({ type: type, value: value });
                             break;
                         }

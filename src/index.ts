@@ -34,10 +34,10 @@ export class Generator {
             switch (token.type) {
                 case "assigner":
                 case "seperator":
-                case "operator":
                     {
                         return content += `${token.value} `;
                     }
+                case "operator":
                 case "number":
                 case "name":
                 case "tab":
@@ -53,7 +53,7 @@ export class Generator {
                     }
                 case "multilinecomment":
                     {
-                        return content += `/** ${token.value} */`;
+                        return content += `${token.value}*/ `;
                     }
                 case "const":
                 case "var":
@@ -274,7 +274,7 @@ export class LexicalAnalyzer {
                         newCurrent = (newCurrent + 1);
                     }
                     token.type = 'operator';
-                    token.value = equalityComparator;
+                    token.value   = (WHITESPACE.test(input[newCurrent])) ? equalityComparator + ' ' : equalityComparator;
                 }
                 current = newCurrent;
                 tokens.push(token);
@@ -320,7 +320,7 @@ export class LexicalAnalyzer {
 
             //multi line comment, should be two astrix, but since ...some people... use /* instead of  /**, we catch both
             if (char === "/" && input[current + 1] === "*") {
-                let value = ''
+                let value = '/';
                 const closing = "*/";
                 let aheadText = ''
                 char = input[current + 3];
@@ -343,6 +343,7 @@ export class LexicalAnalyzer {
                     value += char;
                     char = input[++current];
                 }
+                value = (WHITESPACE.test(input[current])) ? value + ' ' : value;
                 tokens.push({ type, value });
                 continue;
             }
@@ -374,7 +375,6 @@ export class LexicalAnalyzer {
                             this.assigner = false;
                             //check for space after the char and apply to value if there
                             value = (WHITESPACE.test(input[current])) ? value + ' ' : value;
-                            console.log(`whitespace for ${value}?`, WHITESPACE.test(input[current]));
                             tokens.push({ type, value });
                             break;
                         }

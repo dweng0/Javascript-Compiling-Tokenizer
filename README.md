@@ -258,6 +258,179 @@ The AST
    const DECLARABLE_CHARACTERS = /[A-Za-z_.$]/i;
 ```
 
+### Trixie code
+
+```js
+   if(true === false && !!(false >= true) || false != true)
+   {
+      let result = (((5*5)%5)/5);
+      console.log('test', () => { return /** random inline comment */ !!true})
+      //inline multichar ternary/comparator/operator test
+   }
+```
+
+AST
+
+```json
+   {
+    "tokens": [{
+        "type": "name",
+        "value": "if"
+    }, {
+        "type": "params",
+        "value": [{
+            "type": "name",
+            "value": "true "
+        }, {
+            "type": "operator",
+            "value": "==="
+        }, {
+            "type": "assignee",
+            "value": "false"
+        }, {
+            "type": "operator",
+            "value": "&&"
+        }, {
+            "type": "operator",
+            "value": "!!("
+        }, {
+            "type": "name",
+            "value": "false "
+        }, {
+            "type": "operator",
+            "value": ">="
+        }, {
+            "type": "name",
+            "value": "true"
+        }]
+    }, {
+        "type": "operator",
+        "value": "||"
+    }, {
+        "type": "name",
+        "value": "false "
+    }, {
+        "type": "operator",
+        "value": "!="
+    }, {
+        "type": "name",
+        "value": "true"
+    }, {
+        "type": "operator",
+        "value": ")"
+    }, {
+        "type": "carriagereturn",
+        "value": "\n"
+    }, {
+        "type": "codeblock",
+        "value": [{
+            "type": "carriagereturn",
+            "value": "\n"
+        }, {
+            "type": "let",
+            "value": [{
+                "type": "name",
+                "value": "result "
+            }, {
+                "type": "assigner",
+                "value": "="
+            }, {
+                "type": "params",
+                "value": [{
+                    "type": "params",
+                    "value": [{
+                        "type": "params",
+                        "value": [{
+                            "type": "assignee",
+                            "value": "5*5"
+                        }]
+                    }, {
+                        "type": "operator",
+                        "value": "%"
+                    }, {
+                        "type": "name",
+                        "value": "5"
+                    }]
+                }, {
+                    "type": "operator",
+                    "value": "/"
+                }, {
+                    "type": "name",
+                    "value": "5"
+                }]
+            }, {
+                "type": "statementseperator",
+                "value": ";"
+            }]
+        }, {
+            "type": "carriagereturn",
+            "value": "\n"
+        }, {
+            "type": "name",
+            "value": "console.log"
+        }, {
+            "type": "params",
+            "value": [{
+                "type": "string",
+                "value": "'test'"
+            }, {
+                "type": "seperator",
+                "value": ","
+            }, {
+                "type": "params",
+                "value": []
+            }, {
+                "type": "assigner",
+                "value": "="
+            }, {
+                "type": "assignee",
+                "value": ">"
+            }, {
+                "type": "codeblock",
+                "value": [{
+                    "type": "name",
+                    "value": "return "
+                }, {
+                    "type": "multilinecomment",
+                    "value": " ** random inline comment "
+                }, {
+                    "type": "operator",
+                    "value": "!!"
+                }, {
+                    "type": "name",
+                    "value": "true"
+                }]
+            }]
+        }, {
+            "type": "carriagereturn",
+            "value": "\n"
+        }, {
+            "type": "carriagereturn",
+            "value": "\n"
+        }, {
+            "type": "inlinecomment",
+            "value": "//inline multichar ternary/comparator/operator test"
+        }, {
+            "type": "carriagereturn",
+            "value": "\n"
+        }]
+    }],
+    "current": 225
+}
+```
+The output
+
+```js
+if(true === false&& !!( false >= true)|| false != true) 
+{
+let result = (((5*5)% 5)/ 5);
+console.log('test', ()= >{return /**  ** random inline comment  */!! true})
+
+//inline multichar ternary/comparator/operator test
+}
+```
+
+
 ### Some string literals
 
 ``` js
