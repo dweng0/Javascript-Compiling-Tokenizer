@@ -181,15 +181,6 @@ var LexicalAnalyzer = /** @class */ (function () {
                 current++;
                 continue;
             }
-            if (NUMBERS.test(char)) {
-                var value = '';
-                while (NUMBERS.test(char)) {
-                    value += char;
-                    char = input[++current];
-                }
-                tokens.push({ type: 'number', value: value });
-                continue;
-            }
             var doubleQuotedString = this.stringConditional('"', char, input, current);
             if (doubleQuotedString.type) {
                 tokens.push(_.pick(doubleQuotedString, 'type', 'value'));
@@ -237,7 +228,9 @@ var LexicalAnalyzer = /** @class */ (function () {
                         }
                     default:
                         {
-                            tokens.push({ type: 'name', value: value });
+                            var type = (this.assigner) ? 'assignee' : 'name';
+                            this.assigner = false;
+                            tokens.push({ type: type, value: value });
                             break;
                         }
                 }
@@ -250,7 +243,7 @@ var LexicalAnalyzer = /** @class */ (function () {
                 char = input[++current];
                 continue;
             }
-            //if we have an assignment flag, then push any non whiespace chars into a new token until we reach a whitespace
+            //if we have an assignment flag, then push any non whitespace chars into a new token until we reach a whitespace
             if (this.assigner && ASSIGNABLE_CHARACTERS.test(char)) {
                 var value = '';
                 while (ASSIGNABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
@@ -355,7 +348,7 @@ var LexicalAnalyzer = /** @class */ (function () {
         if (char === condition) {
             var value = condition;
             char = input[++current];
-            while (char !== '"') {
+            while (char !== condition) {
                 value += char;
                 char = input[++current];
             }

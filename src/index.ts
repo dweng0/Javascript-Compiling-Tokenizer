@@ -408,7 +408,7 @@ export class LexicalAnalyzer {
 
             let value = condition;
             char = input[++current];
-            while (char !== '"') {
+            while (char !== condition) {
                 value += char;
                 char = input[++current];
             }

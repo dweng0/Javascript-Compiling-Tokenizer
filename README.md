@@ -74,6 +74,14 @@ The function must return an object ```(IThirdPartyParsingResult)``` containing:
 
 Third party lexical checks are always performed first.
 
+## Transforming tokens into Javascript
+
+```
+   new Generator().start(tokens)
+```
+
+This will return a string representation of the tokens provided. all you have to do is pipe it into a file.
+
 ## Dev notes
 
 The tokenizer will recurse in the following conditions:
