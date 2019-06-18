@@ -16,6 +16,9 @@ Other projects utilise this projects and take the resulting abstract syntax tree
 
 For example require to ecma takes the abstract syntax tree generated from this code and uses it to transpile code that contains the old require import system into the new es6 import system
 
+
+![Install](JCT.gif)
+
 ## usage
 
 Install it
@@ -52,10 +55,6 @@ Test it
 ```
     npm test
 ```
-
-Bop it
-
-![Install](JCT.gif)
 
 options
 
