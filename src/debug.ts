@@ -1,4 +1,4 @@
-import LexicalAnalyzer  from './index';
+import { LexicalAnalyzer, Generator }  from './index';
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -14,7 +14,14 @@ const Test = class {
             if(path.extname(file) === '.js')
             {
                 const results =  new LexicalAnalyzer({verbose: true}).start(data.toString());
+                const newFile = new Generator().start(results.tokens);
                 fs.writeFile(path.resolve('examples/ast.json'), JSON.stringify(results), function(err) {
+                    if(err) {
+                        return console.log(err);
+                    }
+                    console.log("The file was saved!");
+                }); 
+                fs.writeFile(path.resolve('examples/newfile.js'), JSON.stringify(newFile), function(err) {
                     if(err) {
                         return console.log(err);
                     }

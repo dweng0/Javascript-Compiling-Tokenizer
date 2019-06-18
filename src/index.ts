@@ -43,6 +43,7 @@ export class Generator {
             case "eol":
             case "carriagereturn":
             case "string":
+            case "stringLiteral":
             case "assignee":
             case "statementseperator":
             {
