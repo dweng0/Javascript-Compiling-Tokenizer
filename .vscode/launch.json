@@ -8,7 +8,7 @@
             "name": "debugMode",
             "program": "${workspaceRoot}\\dist\\debug.js",
             "stopOnEntry": false,
-            "args": ["transpile", "-v", "${workspaceRoot}\\tests"],
+            "args": ["tsc"],
             "cwd": "${workspaceRoot}\\dist",
             "runtimeArgs": [
                 "--nolazy"

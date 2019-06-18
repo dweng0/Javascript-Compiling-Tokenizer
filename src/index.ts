@@ -75,6 +75,10 @@ export class Generator {
             {
                 return content += `{${this.start(token.value)}}`;
             }
+            default:
+            {
+                throw new TypeError('Unable to parse unknown type' + token.type);
+            }
         }
         },"");
     }
@@ -121,6 +125,11 @@ export class LexicalAnalyzer {
 
             if (char === exitOn) {
                 this.log(colors.yellow(`exiting ${exitOn}`));
+                if(exitOn === ';')
+                {
+                    this.log(colors.yellow(`exit on ${char}`));
+                    tokens.push({ type: 'statementseperator', value: char });
+                }
                 if (exitOn === "}" && input[current + 1] === ';') {
                     current = current++;
                 }
@@ -314,7 +323,7 @@ export class LexicalAnalyzer {
             }
             if (char === ';') {
                 this.log(colors.yellow("end of line" + char));
-                tokens.push({ type: 'statementSeperator', value: char });
+                tokens.push({ type: 'statementseperator', value: char });
                 char = input[++current];
                 continue;
             }

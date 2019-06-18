@@ -64,6 +64,10 @@ var Generator = /** @class */ (function () {
                     {
                         return content += "{" + _this.start(token.value) + "}";
                     }
+                default:
+                    {
+                        throw new TypeError('Unable to parse unknown type' + token.type);
+                    }
             }
         }, "");
     };
@@ -103,6 +107,10 @@ var LexicalAnalyzer = /** @class */ (function () {
             char = input[current];
             if (char === exitOn) {
                 this.log(colors.yellow("exiting " + exitOn));
+                if (exitOn === ';') {
+                    this.log(colors.yellow("exit on " + char));
+                    tokens.push({ type: 'statementseperator', value: char });
+                }
                 if (exitOn === "}" && input[current + 1] === ';') {
                     current = current++;
                 }
@@ -262,7 +270,7 @@ var LexicalAnalyzer = /** @class */ (function () {
             }
             if (char === ';') {
                 this.log(colors.yellow("end of line" + char));
-                tokens.push({ type: 'statementSeperator', value: char });
+                tokens.push({ type: 'statementseperator', value: char });
                 char = input[++current];
                 continue;
             }
