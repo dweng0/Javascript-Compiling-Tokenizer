@@ -27,7 +27,7 @@ Install it
 Import it
 
 ```
-    import { LexicalAnalyzer } from 'javascript-compiling-tokenizer';
+    import { LexicalAnalyzer, Generator } from 'javascript-compiling-tokenizer';
 ```
 
 Initialize it
@@ -38,15 +38,24 @@ Initialize it
     //options only have one property.... 'verbose' [boolean]
 ```
 
-Run it
+Tokenize it it
 ```
     const syntaxTree = tokenizer().start(fileAsString);
+```
+
+Turn it back into javascript
+```
+    const js = new Generator().start(syntaxTree);
 ```
 
 Test it
 ```
     npm test
 ```
+
+Bop it
+
+![Install](JCT.gif)
 
 options
 

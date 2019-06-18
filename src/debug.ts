@@ -5,7 +5,7 @@ import * as path from 'path';
 
 const Test = class {
     constructor(){
-        let file = path.resolve('examples/mixture.js');
+        let file = path.resolve('examples/original.js');
         fs.readFile(file, (err, data) => {
             if(err)
             {
