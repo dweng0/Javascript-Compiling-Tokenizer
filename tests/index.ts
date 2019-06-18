@@ -145,7 +145,22 @@ describe('Generator tests', () => {
         expect(new Generator().start([])).to.be.a('string');
     });
 
-    it('should return a token of type string', () => {
-
+    it('token should compile into a const declaration ', () => {
+        const token = { type: 'const', value: [
+            {
+                type:'name',
+                value: 'test'
+            },
+            {
+                type:'assigner',
+                value: '='
+            },
+            {
+                type: 'assignee',
+                value: '_.foo'
+            }
+        ]}
+        const expectedResult = "const test = _.foo";
+        expect(new Generator().start([token])).to.have.string(expectedResult);
     });
 });
