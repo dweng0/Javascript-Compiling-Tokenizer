@@ -92,6 +92,30 @@ describe('Lexer tests', () => {
         expect(result.type).to.have.string('inlinecomment');
     });
 
+    it('should be a codeblock', () =>{
+        const js= '{ }';
+        const result = lexer({verbose:false}).start(js).tokens[0];
+        expect(result.type).to.have.string('codeblock');
+    });
+    it('should be a stringLiteral', () =>{
+        const js= '`im a string literal`';
+        const result = lexer({verbose:false}).start(js).tokens[0];
+        expect(result.type).to.have.string('stringLiteral');
+    })
+
+    it('should be a carriagereturn', () =>{
+        const js= '\r';
+        const result = lexer({verbose:false}).start(js).tokens[0];
+        expect(result.type).to.have.string('eol');
+    });
+
+    it('should be an eol', () =>{
+        const js= '\n';
+        const result = lexer({verbose:false}).start(js).tokens[0];
+        expect(result.type).to.have.string('carriagereturn');
+    });
+
+
 }); 
 
 describe('Generator tests', () => {

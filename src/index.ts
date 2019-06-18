@@ -211,17 +211,6 @@ export class LexicalAnalyzer {
                 continue;
             }
 
-
-            if (NUMBERS.test(char)) {
-                let value = '';
-                while (NUMBERS.test(char)) {
-                    value += char;
-                    char = input[++current];
-                }
-                tokens.push({ type: 'number', value });
-                continue;
-            }
-
             const doubleQuotedString = this.stringConditional(
                 '"',
                 char,
