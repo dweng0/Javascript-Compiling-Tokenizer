@@ -421,11 +421,11 @@ AST
 The output
 
 ```js
-if(true === false&& !!( false >= true)|| false != true) 
+if(true === false && !!(false >= true) || false != true)
 {
-let result = (((5*5)% 5)/ 5);
-console.log('test', ()= >{return /**  ** random inline comment  */!! true})
-
+    let  result = (((5*5)%5)/5);
+    console.log('test', () => { return /** random inline comment */ !!true})
+    
 //inline multichar ternary/comparator/operator test
 }
 ```

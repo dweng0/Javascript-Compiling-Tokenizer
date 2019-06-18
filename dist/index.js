@@ -6,6 +6,7 @@ var CARRIAGE_RETURN = /\n/;
 var TAB = /\t/;
 var EOL = /\r/;
 var WHITESPACE = /\s/;
+var ASTRIX = /[*]/;
 /**
  * Any assignable character
  */
@@ -25,9 +26,6 @@ var Generator = /** @class */ (function () {
             switch (token.type) {
                 case "assigner":
                 case "seperator":
-                    {
-                        return content += token.value + " ";
-                    }
                 case "operator":
                 case "number":
                 case "name":
@@ -39,12 +37,10 @@ var Generator = /** @class */ (function () {
                 case "assignee":
                 case "statementseperator":
                 case "inlinecomment":
+                case "multilinecomment":
+                case "space":
                     {
                         return content += token.value;
-                    }
-                case "multilinecomment":
-                    {
-                        return content += token.value + "*/ ";
                     }
                 case "const":
                 case "var":
@@ -108,6 +104,7 @@ var LexicalAnalyzer = /** @class */ (function () {
             this.log(colors.bgYellow("Checking: " + char));
             if (char === exitOn) {
                 this.log(colors.yellow("exiting " + exitOn));
+                //check for space after the exit condition
                 if (exitOn === ';') {
                     tokens.push({ type: 'statementseperator', value: char });
                 }
@@ -190,6 +187,7 @@ var LexicalAnalyzer = /** @class */ (function () {
                 continue;
             }
             if (WHITESPACE.test(char)) {
+                tokens.push({ type: 'space', value: ' ' });
                 current++;
                 continue;
             }
@@ -221,8 +219,9 @@ var LexicalAnalyzer = /** @class */ (function () {
             if (char === "=") {
                 var newCurrent = (current + 1);
                 var token = { type: 'assigner', value: char };
+                var nextChar = input[current + 1];
                 //if the next char is '=' then its an equality check
-                if (input[current + 1] === '=') {
+                if (nextChar === '=') {
                     newCurrent = (newCurrent + 1);
                     var equalityComparator = char + '=';
                     if (input[current + 2] === '=') {
@@ -230,7 +229,12 @@ var LexicalAnalyzer = /** @class */ (function () {
                         newCurrent = (newCurrent + 1);
                     }
                     token.type = 'operator';
-                    token.value = (WHITESPACE.test(input[newCurrent])) ? equalityComparator + ' ' : equalityComparator;
+                    token.value = equalityComparator;
+                }
+                else if (nextChar === '>') {
+                    token.type = 'operator';
+                    token.value = '=>';
+                    newCurrent = (newCurrent + 1);
                 }
                 current = newCurrent;
                 tokens.push(token);
@@ -272,17 +276,22 @@ var LexicalAnalyzer = /** @class */ (function () {
             }
             //multi line comment, should be two astrix, but since ...some people... use /* instead of  /**, we catch both
             if (char === "/" && input[current + 1] === "*") {
-                var value = '/';
+                var value = '';
                 var closing = "*/";
                 var aheadText = '';
-                char = input[current + 3];
+                //skip the astrix stuff
+                current = (current + 1);
+                char = input[current];
+                while (ASTRIX.test(char)) {
+                    char = input[++current];
+                }
+                //we got this far we no long have astrixesnow we do it until the look ahead
                 while (closing !== aheadText) {
                     value += char;
                     char = input[++current];
                     aheadText = char + input[current + 1];
                 }
-                tokens.push({ type: 'multilinecomment', value: value });
-                //closing comment means we need to move the cursor two aheadText
+                tokens.push({ type: 'multilinecomment', value: "/**" + value + closing });
                 current = (current + 2);
                 continue;
             }
@@ -294,7 +303,6 @@ var LexicalAnalyzer = /** @class */ (function () {
                     value += char;
                     char = input[++current];
                 }
-                value = (WHITESPACE.test(input[current])) ? value + ' ' : value;
                 tokens.push({ type: type, value: value });
                 continue;
             }
@@ -323,8 +331,6 @@ var LexicalAnalyzer = /** @class */ (function () {
                         {
                             var type = (this.assigner) ? 'assignee' : 'name';
                             this.assigner = false;
-                            //check for space after the char and apply to value if there
-                            value = (WHITESPACE.test(input[current])) ? value + ' ' : value;
                             tokens.push({ type: type, value: value });
                             break;
                         }

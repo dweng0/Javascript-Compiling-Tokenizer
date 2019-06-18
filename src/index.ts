@@ -5,6 +5,7 @@ const CARRIAGE_RETURN = /\n/;
 const TAB = /\t/;
 const EOL = /\r/;
 const WHITESPACE = /\s/;
+const ASTRIX = /[*]/
 
 /**
  * Any assignable character
@@ -34,9 +35,6 @@ export class Generator {
             switch (token.type) {
                 case "assigner":
                 case "seperator":
-                    {
-                        return content += `${token.value} `;
-                    }
                 case "operator":
                 case "number":
                 case "name":
@@ -48,12 +46,10 @@ export class Generator {
                 case "assignee":
                 case "statementseperator":
                 case "inlinecomment":
+                case "multilinecomment":
+                case "space":
                     {
                         return content += token.value;
-                    }
-                case "multilinecomment":
-                    {
-                        return content += `${token.value}*/ `;
                     }
                 case "const":
                 case "var":
@@ -77,7 +73,7 @@ export class Generator {
                     {
                         throw new TypeError('Unable to parse unknown type' + token.type);
                     }
-            }
+                }
         }, "");
     }
 }
@@ -123,13 +119,13 @@ export class LexicalAnalyzer {
             this.log(colors.bgYellow(`Checking: ${char}`));
             if (char === exitOn) {
                 this.log(colors.yellow(`exiting ${exitOn}`));
+                //check for space after the exit condition
                 if (exitOn === ';') {
                     tokens.push({ type: 'statementseperator', value: char });
                 }
                 if (exitOn === "}" && input[current + 1] === ';') {
                     current = current++;
                 }
-
                 break;
             }
 
@@ -215,6 +211,7 @@ export class LexicalAnalyzer {
             }
 
             if (WHITESPACE.test(char)) {
+                tokens.push({type: 'space', value: ' '});
                 current++;
                 continue;
             }
@@ -265,8 +262,9 @@ export class LexicalAnalyzer {
             if (char === "=") {
                 let newCurrent = (current + 1)
                 let token = { type: 'assigner', value: char };
+                const nextChar = input[current + 1]
                 //if the next char is '=' then its an equality check
-                if (input[current + 1] === '=') {
+                if (nextChar === '=') {
                     newCurrent = (newCurrent + 1);
                     let equalityComparator = char + '=';
                     if (input[current + 2] === '=') {
@@ -274,7 +272,13 @@ export class LexicalAnalyzer {
                         newCurrent = (newCurrent + 1);
                     }
                     token.type = 'operator';
-                    token.value   = (WHITESPACE.test(input[newCurrent])) ? equalityComparator + ' ' : equalityComparator;
+                    token.value = equalityComparator;
+                }
+                else if(nextChar === '>')
+                {
+                    token.type = 'operator';
+                    token.value = '=>';
+                    newCurrent = (newCurrent + 1);
                 }
                 current = newCurrent;
                 tokens.push(token);
@@ -320,17 +324,25 @@ export class LexicalAnalyzer {
 
             //multi line comment, should be two astrix, but since ...some people... use /* instead of  /**, we catch both
             if (char === "/" && input[current + 1] === "*") {
-                let value = '/';
+                let value = '';
                 const closing = "*/";
                 let aheadText = ''
-                char = input[current + 3];
+                
+                //skip the astrix stuff
+                current = (current + 1);
+                char = input[current];
+                while(ASTRIX.test(char))
+                {
+                    char = input[++current];
+                }
+
+                //we got this far we no long have astrixesnow we do it until the look ahead
                 while (closing !== aheadText) {
                     value += char;
                     char = input[++current];
                     aheadText = char + input[current + 1];
                 }
-                tokens.push({ type: 'multilinecomment', value });
-                //closing comment means we need to move the cursor two aheadText
+                tokens.push({ type: 'multilinecomment', value: "/**"+value+closing });
                 current = (current + 2);
                 continue;
             }
@@ -343,7 +355,6 @@ export class LexicalAnalyzer {
                     value += char;
                     char = input[++current];
                 }
-                value = (WHITESPACE.test(input[current])) ? value + ' ' : value;
                 tokens.push({ type, value });
                 continue;
             }
@@ -373,8 +384,6 @@ export class LexicalAnalyzer {
                         {
                             let type = (this.assigner) ? 'assignee' : 'name';
                             this.assigner = false;
-                            //check for space after the char and apply to value if there
-                            value = (WHITESPACE.test(input[current])) ? value + ' ' : value;
                             tokens.push({ type, value });
                             break;
                         }
