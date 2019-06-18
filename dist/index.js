@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var _ = require("underscore");
 var colors = require("colors");
 var CARRIAGE_RETURN = /\n/;
+var TAB = /\t/;
 var EOL = /\r/;
 var WHITESPACE = /\s/;
 /**
@@ -11,6 +12,64 @@ var WHITESPACE = /\s/;
 var ASSIGNABLE_CHARACTERS = /[^\s,^;]/;
 var NUMBERS = /[0-9]/;
 var DECLARABLE_CHARACTERS = /[A-Za-z_.$]/i;
+//Generate code from the lexer
+var Generator = /** @class */ (function () {
+    function Generator() {
+    }
+    Generator.prototype.start = function (tokens) {
+        var _this = this;
+        return tokens.reduce(function (content, token) {
+            switch (token.type) {
+                case "operator":
+                case "assigner":
+                case "seperator":
+                case "number":
+                case "name":
+                    {
+                        return content += token.value + " ";
+                    }
+                case "tab":
+                case "eol":
+                case "carriagereturn":
+                case "string":
+                case "stringLiteral":
+                case "assignee":
+                case "statementseperator":
+                    {
+                        return content += token.value;
+                    }
+                case "multilinecomment":
+                    {
+                        return content += "/** " + token.value + " */";
+                    }
+                case "inlinecomment":
+                    {
+                        return content += '//' + token.value;
+                    }
+                case "const":
+                case "var":
+                case "let":
+                    {
+                        return content += token.type + " " + _this.start(token.value);
+                    }
+                case "params":
+                    {
+                        return content += "(" + _this.start(token.value) + ")";
+                    }
+                case "array":
+                    {
+                        return content += "[" + _this.start(token.value) + "]";
+                    }
+                case "codeblock":
+                    {
+                        return content += "{" + _this.start(token.value) + "}";
+                    }
+            }
+        }, "");
+    };
+    return Generator;
+}());
+exports.Generator = Generator;
 var LexicalAnalyzer = /** @class */ (function () {
     function LexicalAnalyzer(options) {
         this.verbose = false;
@@ -50,7 +109,6 @@ var LexicalAnalyzer = /** @class */ (function () {
                 break;
             }
             if (!_.isEmpty(this.thirdPartyParsingTests)) {
-                var thirdPartyTokens = Array();
                 this.thirdPartyParsingTests.forEach(function (test) {
                     var result = test(char, current, input);
                     if (result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value)) {
@@ -99,18 +157,23 @@ var LexicalAnalyzer = /** @class */ (function () {
                 var newLine = false;
                 if (EOL.test(char)) {
                     _this.lineNumber = (_this.lineNumber + 1);
-                    tokens.push({ type: 'eol', value: _this.lineNumber });
+                    tokens.push({ type: 'eol', value: char });
                     newLine = true;
                 }
                 if (CARRIAGE_RETURN.test(char)) {
                     _this.lineNumber = (_this.lineNumber + 1);
-                    tokens.push({ type: 'carriagereturn', value: _this.lineNumber });
+                    tokens.push({ type: 'carriagereturn', value: char });
                     newLine = true;
                 }
                 return newLine;
             };
             //test for cr and lf
             if (isNewLine(char)) {
+                current++;
+                continue;
+            }
+            if (TAB.test(char)) {
+                tokens.push({ type: 'tab', value: char });
                 current++;
                 continue;
             }
@@ -127,7 +190,7 @@ var LexicalAnalyzer = /** @class */ (function () {
                 tokens.push({ type: 'number', value: value });
                 continue;
             }
-            var doubleQuotedString = this.maybeDoubleQuotedStringCheck(char, input, current);
+            var doubleQuotedString = this.stringConditional('"', char, input, current);
             if (doubleQuotedString.type) {
                 tokens.push(_.pick(doubleQuotedString, 'type', 'value'));
                 current = doubleQuotedString.current;
@@ -135,7 +198,7 @@ var LexicalAnalyzer = /** @class */ (function () {
                 this.assigner = false;
                 continue;
             }
-            var singleQuotedString = this.maybeSingleQuotedStringCheck(char, input, current);
+            var singleQuotedString = this.stringConditional("'", char, input, current);
             if (singleQuotedString.type) {
                 tokens.push(_.pick(singleQuotedString, 'type', 'value'));
                 current = singleQuotedString.current;
@@ -213,7 +276,7 @@ var LexicalAnalyzer = /** @class */ (function () {
             //inline comment
             if (char === "/" && input[current + 1] == "/") {
                 var value = '';
-                while (!isNewLine(char)) {
+                while (!isNewLine(char) && !_.isUndefined(char)) {
                     value += char;
                     char = input[++current];
                 }
@@ -267,7 +330,6 @@ var LexicalAnalyzer = /** @class */ (function () {
                         continue;
                     }
             }
-            //finally, people end their code in different ways, we log ; because there's a chance its the last 'thing'
             this.log(colors.red("DEBUG current curser " + current + ", last cursor " + input.length + " current char " + char + ", recursive exit condition is " + exitOn));
             throw new TypeError('unknown var type: ' + char);
         }
@@ -276,42 +338,28 @@ var LexicalAnalyzer = /** @class */ (function () {
     LexicalAnalyzer.prototype.maybeBackTickStringCheck = function (char, input, current) {
         var BACK_TICK = /`/;
         if (BACK_TICK.test(char)) {
-            var value = '';
+            var value = "`";
             char = input[++current];
             while (!BACK_TICK.test(char)) {
                 value += char;
                 char = input[++current];
             }
+            value += "`";
             char = input[++current];
             return { type: 'stringLiteral', value: value, current: current };
         }
         return { type: '', value: '' };
     };
-    LexicalAnalyzer.prototype.maybeDoubleQuotedStringCheck = function (char, input, current) {
-        // value inside  double quotes
-        if (char === '"') {
-            var value = '';
+    LexicalAnalyzer.prototype.stringConditional = function (condition, char, input, current) {
+        // capture the quotes and the value inside  double/single quotes
+        if (char === condition) {
+            var value = condition;
             char = input[++current];
             while (char !== '"') {
                 value += char;
                 char = input[++current];
             }
-            //skip the closing quote
-            char = input[++current];
-            return { type: 'string', value: value, current: current };
-        }
-        return { type: '', value: '' };
-    };
-    LexicalAnalyzer.prototype.maybeSingleQuotedStringCheck = function (char, input, current) {
-        // value inside  double quotes
-        if (char === "'") {
-            var value = '';
-            char = input[++current];
-            while (char !== "'") {
-                value += char;
-                char = input[++current];
-            }
-            //skip the closing quote
+            value += condition;
             char = input[++current];
             return { type: 'string', value: value, current: current };
         }
@@ -319,5 +367,5 @@ var LexicalAnalyzer = /** @class */ (function () {
     };
     return LexicalAnalyzer;
 }());
-exports.default = LexicalAnalyzer;
+exports.LexicalAnalyzer = LexicalAnalyzer;
 //# sourceMappingURL=index.js.map

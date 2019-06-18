@@ -27,7 +27,7 @@ interface IThirdPartyParsingResult {
 
 //Generate code from the lexer
 export class Generator {
-    start(tokens) {
+    start(tokens:Array<IPayload>): string {
         return tokens.reduce((content, token) => {
         switch(token.type)
         {
@@ -331,7 +331,7 @@ export class LexicalAnalyzer {
             //inline comment
             if (char === "/" && input[current + 1] == "/") {
                 let value = '';
-                while (!isNewLine(char)) {
+                while (!isNewLine(char) && !_.isUndefined(char)) {
                     value += char;
                     char = input[++current];
                 }

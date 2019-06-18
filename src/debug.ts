@@ -21,7 +21,7 @@ const Test = class {
                     }
                     console.log("The file was saved!");
                 }); 
-                fs.writeFile(path.resolve('examples/newfile.js'), JSON.stringify(newFile), function(err) {
+                fs.writeFile(path.resolve('examples/newfile.js'), newFile, function(err) {
                     if(err) {
                         return console.log(err);
                     }

@@ -1,4 +1,4 @@
-import LexicalAnalyzer from '../src';
+import { LexicalAnalyzer, Generator} from '../src';
 import { expect } from 'chai';
 import 'mocha';
 
@@ -52,4 +52,59 @@ describe('Lexer tests', () => {
         expect(results.tokens).to.be.an('array');
         expect(results.tokens).to.not.be.empty;
     })
+
+    it('should return a token of type const', () => {
+        const js= 'const test = "hithere"';
+        const result = lexer({verbose:false}).start(js);
+        expect(result.tokens[0].type).to.have.string('const');
+    });
+    it('should return a token of type let', () => {
+        const js= 'let test = "hithere"';
+        const result = lexer({verbose:false}).start(js);
+        expect(result.tokens[0].type).to.have.string('let');
+    });
+    it('should return a token of type var', () => {
+        const js= 'var test = "hithere"';
+        const result = lexer({verbose:false}).start(js);
+        expect(result.tokens[0].type).to.have.string('var');
+    });
+
+    it('should have a token value typeof array', () => {
+        const js= 'var test = "hithere"';
+        const result = lexer({verbose:false}).start(js);
+        expect(result.tokens[0].value).to.be.an('array');
+    });
+    it('token value length should be three', () => {
+        const js= 'var test = "hithere"';
+        const result = lexer({verbose:false}).start(js);
+        expect(result.tokens[0].value).to.be.lengthOf(3);
+    });
+   
+    it('should be multiline comment', () => {
+        const js= '/** im a multiline */';
+        const result = lexer({verbose:false}).start(js).tokens[0];
+        expect(result.type).to.have.string('multilinecomment');
+    });
+
+    it('should be an inline comment', () => {
+        const js= '// im a comment';
+        const result = lexer({verbose:false}).start(js).tokens[0];
+        expect(result.type).to.have.string('inlinecomment');
+    });
+
 }); 
+
+describe('Generator tests', () => {
+
+   it('Should not throw on initialize', () => {
+        expect(() => { new Generator()}).to.not.throw();
+    });
+
+    it('should return an empty string when no tokens are provided',() => {
+        expect(new Generator().start([])).to.be.a('string');
+    });
+
+    it('should return a token of type string', () => {
+
+    });
+});
