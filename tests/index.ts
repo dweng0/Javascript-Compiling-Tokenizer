@@ -74,10 +74,10 @@ describe('Lexer tests', () => {
         const result = lexer({verbose:false}).start(js);
         expect(result.tokens[0].value).to.be.an('array');
     });
-    it('token value length should be three', () => {
+    it('token value length should be six', () => {
         const js= 'var test = "hithere"';
         const result = lexer({verbose:false}).start(js);
-        expect(result.tokens[0].value).to.be.lengthOf(3);
+        expect(result.tokens[0].value).to.be.lengthOf(6);
     });
    
     it('should be multiline comment', () => {
@@ -123,13 +123,22 @@ describe('Lexer tests', () => {
 
     it('should be an assignee', () =>{
         const js= '= _.thing';
-        const result = lexer({verbose:false}).start(js).tokens[1];
+        const result = lexer({verbose:false}).start(js).tokens[2];
         expect(result.type).to.have.string('assignee');
     });
 
+    it('check spacing tokens are being pushed in correctly', () => {
+        const js = 'const me = "you"; ';
+        const tokens = lexer({verbose:false}).start(js).tokens[0].value;
+        
+        expect(tokens[0].type).to.have.string('space');
+        expect(tokens[2].type).to.have.string('space');
+        expect(tokens[4].type).to.have.string('space');
+    })
+
     it('should be a string', () =>{
         const js= '= "thing"';
-        const result = lexer({verbose:false}).start(js).tokens[1];
+        const result = lexer({verbose:false}).start(js).tokens[2];
         expect(result.type).to.have.string('string');
     });
 
@@ -152,10 +161,19 @@ describe('Generator tests', () => {
                 value: 'test'
             },
             {
+                type:'space',
+                value: ' '
+            },
+            {
                 type:'assigner',
                 value: '='
             },
             {
+                type:'space',
+                value: ' '
+            },
+            {
+                
                 type: 'assignee',
                 value: '_.foo'
             }
