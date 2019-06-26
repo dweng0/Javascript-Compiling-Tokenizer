@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = require("./index");
 var fs = require("fs");
 var path = require("path");
-var Test = /** @class */ (function () {
+var Test = (function () {
     function class_1() {
         var file = path.resolve('examples/original.js');
         fs.readFile(file, function (err, data) {
@@ -17,6 +17,7 @@ var Test = /** @class */ (function () {
                     if (err) {
                         return console.log(err);
                     }
+                    console.log("The file was saved!");
                 });
                 fs.writeFile(path.resolve('examples/newfile.js'), newFile, function (err) {
                     if (err) {
