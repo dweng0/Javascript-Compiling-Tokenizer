@@ -1,5 +1,4 @@
 import * as _ from 'underscore';
-import * as colors from 'colors';
 
 const CARRIAGE_RETURN = /\n/;
 const TAB = /\t/;
@@ -116,9 +115,9 @@ export class LexicalAnalyzer {
         while (current < input.length) {
 
             char = input[current];
-            this.log(colors.bgYellow(`Checking: ${char}`));
+            this.log(`Checking: ${char}`);
             if (char === exitOn) {
-                this.log(colors.yellow(`exiting ${exitOn}`));
+                this.log(`exiting ${exitOn}`);
                 //check for space after the exit condition
                 if (exitOn === ';') {
                     tokens.push({ type: 'statementseperator', value: char });
@@ -130,7 +129,7 @@ export class LexicalAnalyzer {
             }
 
             if (!_.isEmpty(this.thirdPartyParsingTests)) {
-                this.log(colors.bgYellow(`Enter thirdparty ${char}`));
+                this.log(`Enter thirdparty ${char}`);
                 this.thirdPartyParsingTests.forEach(test => {
                     let result = test(char, current, input);
                     if (result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value)) {
@@ -148,8 +147,8 @@ export class LexicalAnalyzer {
             }
             //paren
             if (char === '(') {
-                this.log(colors.bgYellow(`Enter ${char}`));
-                this.log(colors.yellow("entering " + char));
+                this.log(`Enter ${char}`);
+                this.log("entering " + char);
                 char = input[++current];
                 let results = this.start(input, current, ')');
                 tokens.push({ type: 'params', value: results.tokens });
@@ -160,7 +159,7 @@ export class LexicalAnalyzer {
 
             //arr
             if (char === '[') {
-                this.log(colors.bgYellow(`Enter ${char}`));
+                this.log(`Enter ${char}`);
                 char = input[++current];
                 let results = this.start(input, current, ']');
                 tokens.push({ type: 'array', value: results.tokens });
@@ -171,7 +170,7 @@ export class LexicalAnalyzer {
 
             //body
             if (char === '{') {
-                this.log(colors.bgYellow(`Enter ${char}`));
+                this.log(`Enter ${char}`);
                 char = input[++current];
                 let results = this.start(input, current, '}');
                 tokens.push({ type: 'codeblock', value: results.tokens });
@@ -181,7 +180,7 @@ export class LexicalAnalyzer {
             }
 
             const isNewLine = (char) => {
-                this.log(colors.bgYellow(`Newline check ${char}`));
+                this.log(`Newline check ${char}`);
                 let newLine = false;
                 if (EOL.test(char)) {
                     this.lineNumber = (this.lineNumber + 1);
@@ -193,7 +192,7 @@ export class LexicalAnalyzer {
                     tokens.push({ type: 'carriagereturn', value: char });
                     newLine = true;
                 }
-                this.log(colors.bgYellow(`Newline: ${newLine}`));
+                this.log(`Newline: ${newLine}`);
                 return newLine;
             }
 
@@ -293,7 +292,7 @@ export class LexicalAnalyzer {
                     value += char;
                     char = input[++current];
                 }
-                this.log(colors.bgCyan(value));
+                this.log(value);
                 tokens.push({ type: 'assignee', value: value });
                 this.assigner = false;
                 continue;
@@ -305,7 +304,7 @@ export class LexicalAnalyzer {
                 continue;
             }
             if (char === ';') {
-                this.log(colors.yellow("end of line" + char));
+                this.log("end of line" + char);
                 tokens.push({ type: 'statementseperator', value: char });
                 char = input[++current];
                 continue;
@@ -365,7 +364,7 @@ export class LexicalAnalyzer {
                     value += char;
                     char = input[++current];
                 }
-                this.log(colors.bgCyan(value));
+                this.log(value);
 
                 //check name for reserved
                 switch (value) {
@@ -373,7 +372,7 @@ export class LexicalAnalyzer {
                     case "var":
                     case "let":
                         {
-                            this.log(colors.yellow("entering " + char));
+                            this.log("entering ");
                             const results = this.start(input, current, ';');
                             tokens.push({ type: value, value: results.tokens });
                             current = results.current;
@@ -391,7 +390,7 @@ export class LexicalAnalyzer {
                 continue;
             }
 
-            this.log(colors.red(`DEBUG current curser ${current}, last cursor ${input.length} current char ${char}, recursive exit condition is ${exitOn}`));
+            this.log(`DEBUG current curser ${current}, last cursor ${input.length} current char ${char}, recursive exit condition is ${exitOn}`);
             throw new TypeError('unknown var type: ' + char);
         }
         return { tokens, current };
