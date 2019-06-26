@@ -1,6 +1,6 @@
 {
   "name": "javascript-compiling-tokenizer",
-  "version": "2.6.5",
+  "version": "2.6.6",
   "description": "Compile javascript into an AST to be consumed by other tools",
   "main": "dist/index.js",
   "scripts": {
