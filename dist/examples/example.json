@@ -1,0 +1,316 @@
+{
+    "tokens": [{
+        "type": "name",
+        "value": "import"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "name",
+        "value": "React"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "name",
+        "value": "from"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "string",
+        "value": "'react'"
+    }, {
+        "type": "statementseperator",
+        "value": ";"
+    }, {
+        "type": "carriagereturn",
+        "value": "\n"
+    }, {
+        "type": "name",
+        "value": "import"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "name",
+        "value": "ReactDOM"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "name",
+        "value": "from"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "string",
+        "value": "'react-dom'"
+    }, {
+        "type": "statementseperator",
+        "value": ";"
+    }, {
+        "type": "carriagereturn",
+        "value": "\n"
+    }, {
+        "type": "name",
+        "value": "import"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "codeblock",
+        "value": [{
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "name",
+            "value": "Provider"
+        }, {
+            "type": "space",
+            "value": " "
+        }]
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "name",
+        "value": "from"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "string",
+        "value": "'react-redux'"
+    }, {
+        "type": "statementseperator",
+        "value": ";"
+    }, {
+        "type": "carriagereturn",
+        "value": "\n"
+    }, {
+        "type": "name",
+        "value": "import"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "codeblock",
+        "value": [{
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "name",
+            "value": "createStore"
+        }, {
+            "type": "space",
+            "value": " "
+        }]
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "name",
+        "value": "from"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "string",
+        "value": "'redux'"
+    }, {
+        "type": "statementseperator",
+        "value": ";"
+    }, {
+        "type": "carriagereturn",
+        "value": "\n"
+    }, {
+        "type": "carriagereturn",
+        "value": "\n"
+    }, {
+        "type": "name",
+        "value": "import"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "name",
+        "value": "App"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "name",
+        "value": "from"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "string",
+        "value": "'./components/App'"
+    }, {
+        "type": "statementseperator",
+        "value": ";"
+    }, {
+        "type": "carriagereturn",
+        "value": "\n"
+    }, {
+        "type": "name",
+        "value": "import"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "name",
+        "value": "reducers"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "name",
+        "value": "from"
+    }, {
+        "type": "space",
+        "value": " "
+    }, {
+        "type": "string",
+        "value": "'./reducers'"
+    }, {
+        "type": "statementseperator",
+        "value": ";"
+    }, {
+        "type": "carriagereturn",
+        "value": "\n"
+    }, {
+        "type": "carriagereturn",
+        "value": "\n"
+    }, {
+        "type": "name",
+        "value": "ReactDOM.render"
+    }, {
+        "type": "params",
+        "value": [{
+            "type": "carriagereturn",
+            "value": "\n"
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "operator",
+            "value": "<"
+        }, {
+            "type": "name",
+            "value": "Provider"
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "name",
+            "value": "store"
+        }, {
+            "type": "assigner",
+            "value": "="
+        }, {
+            "type": "codeblock",
+            "value": [{
+                "type": "assignee",
+                "value": "createStore"
+            }, {
+                "type": "params",
+                "value": [{
+                    "type": "name",
+                    "value": "reducers"
+                }]
+            }]
+        }, {
+            "type": "operator",
+            "value": ">"
+        }, {
+            "type": "carriagereturn",
+            "value": "\n"
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "operator",
+            "value": "<"
+        }, {
+            "type": "name",
+            "value": "App/>"
+        }, {
+            "type": "carriagereturn",
+            "value": "\n"
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "operator",
+            "value": "</"
+        }, {
+            "type": "name",
+            "value": "Provider>,"
+        }, {
+            "type": "space",
+            "value": " "
+        }, {
+            "type": "name",
+            "value": "document.getElementById"
+        }, {
+            "type": "params",
+            "value": [{
+                "type": "string",
+                "value": "'root'"
+            }]
+        }, {
+            "type": "carriagereturn",
+            "value": "\n"
+        }]
+    }, {
+        "type": "statementseperator",
+        "value": ";"
+    }],
+    "current": 340
+}

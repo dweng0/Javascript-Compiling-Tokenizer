@@ -2,7 +2,7 @@
   "name": "javascript-compiling-tokenizer",
   "version": "2.6.4",
   "description": "Compile javascript into an AST to be consumed by other tools",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "mocha -r ts-node/register tests/**.ts"
   },
