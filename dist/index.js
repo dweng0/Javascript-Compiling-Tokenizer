@@ -6,7 +6,7 @@ var TAB = /\t/;
 var EOL = /\r/;
 var WHITESPACE = /\s/;
 var ASTRIX = /[*]/;
-var ASSIGNABLE_CHARACTERS = /[^\s\n\t\r;(){}[\]=]/;
+var ASSIGNABLE_CHARACTERS = /[^\s\n\t\r,;(){}[\]=]/;
 var SPECIAL_CHARACTERS = /[^a-zA-Z0-9_;\s\n\t\r]/;
 var Generator = (function () {
     function Generator() {

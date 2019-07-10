@@ -9,7 +9,7 @@ const ASTRIX = /[*]/
 /**
  * Any assignable character
  */
-const ASSIGNABLE_CHARACTERS = /[^\s\n\t\r;(){}[\]=]/;
+const ASSIGNABLE_CHARACTERS = /[^\s\n\t\r,;(){}[\]=]/;
 
 /**
  * Match all special characters except underscore and semicolon... and whitespace.. and tabs... and newlines
