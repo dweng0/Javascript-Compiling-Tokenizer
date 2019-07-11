@@ -29,13 +29,13 @@ var Generator = (function () {
                 case "statementseperator":
                 case "inlinecomment":
                 case "multilinecomment":
-                case "space":
-                    {
-                        return content += token.value;
-                    }
+                case "space": {
+                    return content += token.value;
+                }
                 case "const":
                 case "var":
                 case "let":
+                case "import":
                     {
                         return content += token.type + " " + _this.start(token.value);
                     }

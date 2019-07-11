@@ -17,416 +17,413 @@ const ASSIGNABLE_CHARACTERS = /[^\s\n\t\r,;(){}[\]=]/;
 const SPECIAL_CHARACTERS = /[^a-zA-Z0-9_;\s\n\t\r]/;
 
 interface IPayload {
-    type: string,
-    value: any
+	type: string,
+	value: any
 }
 
 interface IThirdPartyParsingResult {
-    payload: IPayload,
-    currentCursorPosition: number
+	payload: IPayload,
+	currentCursorPosition: number
 }
 
 //Generate code from the lexer
 export class Generator {
-    start(tokens: Array<IPayload>): string {
-        return tokens.reduce((content, token) => {
-            //check operator positioning
-            switch (token.type) {
-                case "assigner":
-                case "seperator":
-                case "operator":
-                case "number":
-                case "name":
-                case "tab":
-                case "eol":
-                case "carriagereturn":
-                case "string":
-                case "stringLiteral":
-                case "assignee":
-                case "statementseperator":
-                case "inlinecomment":
-                case "multilinecomment":
-                case "space":
-                    {
-                        return content += token.value;
-                    }
-                case "const":
-                case "var":
-                case "let":
+	start(tokens: Array<IPayload>): string {
+		return tokens.reduce((content, token) => {
+			//check operator positioning
+			switch (token.type) {
+				case "assigner":
+				case "seperator":
+				case "operator":
+				case "number":
+				case "name":
+				case "tab":
+				case "eol":
+				case "carriagereturn":
+				case "string":
+				case "stringLiteral":
+				case "assignee":
+				case "statementseperator":
+				case "inlinecomment":
+				case "multilinecomment":
+				case "space": {
+						return content += token.value;
+					}
+				case "const":
+				case "var":
+				case "let":
 				case "import":
-                    {
-                        return content += `${token.type} ${this.start(token.value)}`;
-                    }
-                case "params":
-                    {
-                        return content += `(${this.start(token.value)})`;
-                    }
-                case "array":
-                    {
-                        return content += `[${this.start(token.value)}]`;
-                    }
-                case "codeblock":
-                    {
-                        return content += `{${this.start(token.value)}}`;
-                    }
-                default:
-                    {
-                        throw new TypeError('Unable to parse unknown type' + token.type);
-                    }
-                }
-        }, "");
-    }
+					{
+						return content += `${token.type} ${this.start(token.value)}`;
+					}
+				case "params":
+					{
+						return content += `(${this.start(token.value)})`;
+					}
+				case "array":
+					{
+						return content += `[${this.start(token.value)}]`;
+					}
+				case "codeblock":
+					{
+						return content += `{${this.start(token.value)}}`;
+					}
+				default:
+					{
+						throw new TypeError('Unable to parse unknown type' + token.type);
+					}
+			}
+		}, "");
+	}
 }
 
 export class LexicalAnalyzer {
-    verbose: boolean = false;
-    lineNumber: number = 0;
-    assigner: boolean = false;
-    thirdPartyParsingTests: Array<(char: string, current: number, input: string) => IThirdPartyParsingResult> = [];
+	verbose: boolean = false;
+	lineNumber: number = 0;
+	assigner: boolean = false;
+	thirdPartyParsingTests: Array<(char: string, current: number, input: string) => IThirdPartyParsingResult> = [];
 
-    log(message: string) {
-        if (this.verbose) {
-            return console.log(message);
-        }
-    }
+	log(message: string) {
+		if (this.verbose) {
+			return console.log(message);
+		}
+	}
 
-    constructor(options) {
-        if (_.isEmpty(options)) {
-            throw new Error('No options have been provided');
-        }
+	constructor(options) {
+		if (_.isEmpty(options)) {
+			throw new Error('No options have been provided');
+		}
 
-        if (options.verbose) {
-            this.verbose = true;
-        }
+		if (options.verbose) {
+			this.verbose = true;
+		}
 
-        if (options.thirdPartyParsingTests && options.thirdPartyParsingTests.length > 0) {
-            this.thirdPartyParsingTests = [...this.thirdPartyParsingTests, options.thirdPartyParsingTests];
-        }
-    }
+		if (options.thirdPartyParsingTests && options.thirdPartyParsingTests.length > 0) {
+			this.thirdPartyParsingTests = [...this.thirdPartyParsingTests, options.thirdPartyParsingTests];
+		}
+	}
 
-    start(input, current?, exitOn?) {
-        if (!input) {
-            throw new Error('No Input string provided');
-        }
+	start(input, current?, exitOn?) {
+		if (!input) {
+			throw new Error('No Input string provided');
+		}
 
-        current = current || 0;
-        let tokens = Array<IPayload>();
-        let char = input[current];
+		current = current || 0;
+		let tokens = Array<IPayload>();
+		let char = input[current];
 
-        while (current < input.length) {
+		while (current < input.length) {
 
-            char = input[current];
-            this.log(`Checking: ${char}`);
-            if (char === exitOn) {
-                this.log(`exiting ${exitOn}`);
-                //check for space after the exit condition
-                if (exitOn === ';') {
-                    tokens.push({ type: 'statementseperator', value: char });
-                }
-                if (exitOn === "}" && input[current + 1] === ';') {
-                    current = current++;
-                }
-                break;
-            }
+			char = input[current];
+			this.log(`Checking: ${char}`);
+			if (char === exitOn) {
+				this.log(`exiting ${exitOn}`);
+				//check for space after the exit condition
+				if (exitOn === ';') {
+					tokens.push({ type: 'statementseperator', value: char });
+				}
+				if (exitOn === "}" && input[current + 1] === ';') {
+					current = current++;
+				}
+				break;
+			}
 
-            if (!_.isEmpty(this.thirdPartyParsingTests)) {
-                this.log(`Enter thirdparty ${char}`);
-                this.thirdPartyParsingTests.forEach(test => {
-                    let result = test(char, current, input);
-                    if (result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value)) {
-                        if (!result.currentCursorPosition) {
-                            throw new Error('Third party parsing function must return the new cursor position');
-                        }
+			if (!_.isEmpty(this.thirdPartyParsingTests)) {
+				this.log(`Enter thirdparty ${char}`);
+				this.thirdPartyParsingTests.forEach(test => {
+					let result = test(char, current, input);
+					if (result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value)) {
+						if (!result.currentCursorPosition) {
+							throw new Error('Third party parsing function must return the new cursor position');
+						}
 
-                        tokens.push(result.payload);
-                        current = result.currentCursorPosition;
-                    }
-                    else {
-                        this.log('third party function returned no results, continuing');
-                    }
-                });
-            }
-            //paren
-            if (char === '(') {
-                this.log(`Enter ${char}`);
-                this.log("entering " + char);
-                char = input[++current];
-                let results = this.start(input, current, ')');
-                tokens.push({ type: 'params', value: results.tokens });
-                current = results.current;
-                char = input[++current];
-                continue;
-            }
+						tokens.push(result.payload);
+						current = result.currentCursorPosition;
+					}
+					else {
+						this.log('third party function returned no results, continuing');
+					}
+				});
+			}
+			//paren
+			if (char === '(') {
+				this.log(`Enter ${char}`);
+				this.log("entering " + char);
+				char = input[++current];
+				let results = this.start(input, current, ')');
+				tokens.push({ type: 'params', value: results.tokens });
+				current = results.current;
+				char = input[++current];
+				continue;
+			}
 
-            //arr
-            if (char === '[') {
-                this.log(`Enter ${char}`);
-                char = input[++current];
-                let results = this.start(input, current, ']');
-                tokens.push({ type: 'array', value: results.tokens });
-                current = results.current;
-                char = input[++current];
-                continue;
-            }
+			//arr
+			if (char === '[') {
+				this.log(`Enter ${char}`);
+				char = input[++current];
+				let results = this.start(input, current, ']');
+				tokens.push({ type: 'array', value: results.tokens });
+				current = results.current;
+				char = input[++current];
+				continue;
+			}
 
-            //body
-            if (char === '{') {
-                this.log(`Enter ${char}`);
-                char = input[++current];
-                let results = this.start(input, current, '}');
-                tokens.push({ type: 'codeblock', value: results.tokens });
-                current = results.current;
-                char = input[++current];
-                continue;
-            }
+			//body
+			if (char === '{') {
+				this.log(`Enter ${char}`);
+				char = input[++current];
+				let results = this.start(input, current, '}');
+				tokens.push({ type: 'codeblock', value: results.tokens });
+				current = results.current;
+				char = input[++current];
+				continue;
+			}
 
-            const isNewLine = (char) => {
-                this.log(`Newline check ${char}`);
-                let newLine = false;
-                if (EOL.test(char)) {
-                    this.lineNumber = (this.lineNumber + 1);
-                    tokens.push({ type: 'eol', value: char });
-                    newLine = true;
-                }
-                if (CARRIAGE_RETURN.test(char)) {
-                    this.lineNumber = (this.lineNumber + 1);
-                    tokens.push({ type: 'carriagereturn', value: char });
-                    newLine = true;
-                }
-                this.log(`Newline: ${newLine}`);
-                return newLine;
-            }
+			const isNewLine = (char) => {
+				this.log(`Newline check ${char}`);
+				let newLine = false;
+				if (EOL.test(char)) {
+					this.lineNumber = (this.lineNumber + 1);
+					tokens.push({ type: 'eol', value: char });
+					newLine = true;
+				}
+				if (CARRIAGE_RETURN.test(char)) {
+					this.lineNumber = (this.lineNumber + 1);
+					tokens.push({ type: 'carriagereturn', value: char });
+					newLine = true;
+				}
+				this.log(`Newline: ${newLine}`);
+				return newLine;
+			}
 
-            //test for cr and lf
-            if (isNewLine(char)) {
-                current++;
-                continue;
-            }
+			//test for cr and lf
+			if (isNewLine(char)) {
+				current++;
+				continue;
+			}
 
-            if (TAB.test(char)) {
+			if (TAB.test(char)) {
 
-                tokens.push({ type: 'tab', value: '\t' });
-                current++;
-                continue;
-            }
+				tokens.push({ type: 'tab', value: '\t' });
+				current++;
+				continue;
+			}
 
-            if (WHITESPACE.test(char)) {
-                tokens.push({type: 'space', value: ' '});
-                current++;
-                continue;
-            }
+			if (WHITESPACE.test(char)) {
+				tokens.push({ type: 'space', value: ' ' });
+				current++;
+				continue;
+			}
 
-            const doubleQuotedString = this.stringConditional(
-                '"',
-                char,
-                input,
-                current
-            );
-            if (doubleQuotedString.type) {
-                tokens.push(_.pick(doubleQuotedString, 'type', 'value'));
-                current = doubleQuotedString.current;
-                char = input[current];
-                this.assigner = false;
-                continue;
-            }
+			const doubleQuotedString = this.stringConditional(
+				'"',
+				char,
+				input,
+				current
+			);
+			if (doubleQuotedString.type) {
+				tokens.push(_.pick(doubleQuotedString, 'type', 'value'));
+				current = doubleQuotedString.current;
+				char = input[current];
+				this.assigner = false;
+				continue;
+			}
 
-            const singleQuotedString = this.stringConditional(
-                "'",
-                char,
-                input,
-                current
-            );
-            if (singleQuotedString.type) {
-                tokens.push(_.pick(singleQuotedString, 'type', 'value'));
-                current = singleQuotedString.current;
-                char = input[current];
-                this.assigner = false;
-                continue;
-            }
+			const singleQuotedString = this.stringConditional(
+				"'",
+				char,
+				input,
+				current
+			);
+			if (singleQuotedString.type) {
+				tokens.push(_.pick(singleQuotedString, 'type', 'value'));
+				current = singleQuotedString.current;
+				char = input[current];
+				this.assigner = false;
+				continue;
+			}
 
-            const backTickString = this.maybeBackTickStringCheck(
-                char,
-                input,
-                current
-            );
-            if (backTickString.type) {
-                tokens.push(_.pick(backTickString, 'type', 'value'));
-                current = backTickString.current;
-                char = input[current];
-                this.assigner = false;
-                continue;
-            }
+			const backTickString = this.maybeBackTickStringCheck(
+				char,
+				input,
+				current
+			);
+			if (backTickString.type) {
+				tokens.push(_.pick(backTickString, 'type', 'value'));
+				current = backTickString.current;
+				char = input[current];
+				this.assigner = false;
+				continue;
+			}
 
 
-            //check for assignment call
-            if (char === "=") {
-                let newCurrent = (current + 1)
-                let token = { type: 'assigner', value: char };
-                const nextChar = input[current + 1]
-                //if the next char is '=' then its an equality check
-                if (nextChar === '=') {
-                    newCurrent = (newCurrent + 1);
-                    let equalityComparator = char + '=';
-                    if (input[current + 2] === '=') {
-                        equalityComparator += "=";
-                        newCurrent = (newCurrent + 1);
-                    }
-                    token.type = 'operator';
-                    token.value = equalityComparator;
-                }
-                else if(nextChar === '>')
-                {
-                    token.type = 'operator';
-                    token.value = '=>';
-                    newCurrent = (newCurrent + 1);
-                }
-                current = newCurrent;
-                tokens.push(token);
-                this.assigner = true;
-                continue;
-            }
+			//check for assignment call
+			if (char === "=") {
+				let newCurrent = (current + 1)
+				let token = { type: 'assigner', value: char };
+				const nextChar = input[current + 1]
+				//if the next char is '=' then its an equality check
+				if (nextChar === '=') {
+					newCurrent = (newCurrent + 1);
+					let equalityComparator = char + '=';
+					if (input[current + 2] === '=') {
+						equalityComparator += "=";
+						newCurrent = (newCurrent + 1);
+					}
+					token.type = 'operator';
+					token.value = equalityComparator;
+				}
+				else if (nextChar === '>') {
+					token.type = 'operator';
+					token.value = '=>';
+					newCurrent = (newCurrent + 1);
+				}
+				current = newCurrent;
+				tokens.push(token);
+				this.assigner = true;
+				continue;
+			}
 
-            //if we have an assignment flag, then push any non whitespace chars into a new token until we reach a whitespace
-            if (this.assigner && ASSIGNABLE_CHARACTERS.test(char)) {
-                let value = '';
-                while (ASSIGNABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
-                    value += char;
-                    char = input[++current];
-                }
-                this.log(value);
-                tokens.push({ type: 'assignee', value: value });
-                this.assigner = false;
-                continue;
-            }
+			//if we have an assignment flag, then push any non whitespace chars into a new token until we reach a whitespace
+			if (this.assigner && ASSIGNABLE_CHARACTERS.test(char)) {
+				let value = '';
+				while (ASSIGNABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
+					value += char;
+					char = input[++current];
+				}
+				this.log(value);
+				tokens.push({ type: 'assignee', value: value });
+				this.assigner = false;
+				continue;
+			}
 
-            if (char === ',') {
-                tokens.push({ type: 'seperator', value: char });
-                char = input[++current];
-                continue;
-            }
-            if (char === ';') {
-                this.log("end of line" + char);
-                tokens.push({ type: 'statementseperator', value: char });
-                char = input[++current];
-                continue;
-            }
+			if (char === ',') {
+				tokens.push({ type: 'seperator', value: char });
+				char = input[++current];
+				continue;
+			}
+			if (char === ';') {
+				this.log("end of line" + char);
+				tokens.push({ type: 'statementseperator', value: char });
+				char = input[++current];
+				continue;
+			}
 
-            //inline comment
-            if (char === "/" && input[current + 1] == "/") {
-                let value = '';
-                while (!isNewLine(char) && !_.isUndefined(char)) {
-                    value += char;
-                    char = input[++current];
-                }
-                tokens.push({ type: 'inlinecomment', value });
-                continue;
-            }
+			//inline comment
+			if (char === "/" && input[current + 1] == "/") {
+				let value = '';
+				while (!isNewLine(char) && !_.isUndefined(char)) {
+					value += char;
+					char = input[++current];
+				}
+				tokens.push({ type: 'inlinecomment', value });
+				continue;
+			}
 
-            //multi line comment, should be two astrix, but since ...some people... use /* instead of  /**, we catch both
-            if (char === "/" && input[current + 1] === "*") {
-                let value = '';
-                const closing = "*/";
-                let aheadText = ''
-                
-                //skip the astrix stuff
-                current = (current + 1);
-                char = input[current];
-                while(ASTRIX.test(char))
-                {
-                    char = input[++current];
-                }
+			//multi line comment, should be two astrix, but since ...some people... use /* instead of  /**, we catch both
+			if (char === "/" && input[current + 1] === "*") {
+				let value = '';
+				const closing = "*/";
+				let aheadText = ''
 
-                //we got this far we no long have astrixesnow we do it until the look ahead
-                while (closing !== aheadText) {
-                    value += char;
-                    char = input[++current];
-                    aheadText = char + input[current + 1];
-                }
-                tokens.push({ type: 'multilinecomment', value: "/**"+value+closing });
-                current = (current + 2);
-                continue;
-            }
+				//skip the astrix stuff
+				current = (current + 1);
+				char = input[current];
+				while (ASTRIX.test(char)) {
+					char = input[++current];
+				}
 
-            //check for operators
-            if (SPECIAL_CHARACTERS.test(char)) {
-                let value = '';
-                const type = 'operator';
-                while (SPECIAL_CHARACTERS.test(char) && !_.isUndefined(char)) {
-                    value += char;
-                    char = input[++current];
-                }
-                tokens.push({ type, value });
-                continue;
-            }
-            //declarations must start with a alpha character, however, afterwards it can contain numbers (check the while decl)
-            if (ASSIGNABLE_CHARACTERS.test(char)) {
-                let value = '';
-                while (ASSIGNABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
-                    value += char;
-                    char = input[++current];
-                }
-                this.log(value);
+				//we got this far we no long have astrixesnow we do it until the look ahead
+				while (closing !== aheadText) {
+					value += char;
+					char = input[++current];
+					aheadText = char + input[current + 1];
+				}
+				tokens.push({ type: 'multilinecomment', value: "/**" + value + closing });
+				current = (current + 2);
+				continue;
+			}
 
-                //check name for reserved
-                switch (value) {
-                    case "const":
-                    case "var":
-                    case "let":
-                        {
-                            this.log("entering ");
-                            const results = this.start(input, current, ';');
-                            tokens.push({ type: value, value: results.tokens });
-                            current = results.current;
-                            char = input[++current];
-                            break;
-                        }
-                    default:
-                        {
-                            let type = (this.assigner) ? 'assignee' : 'name';
-                            this.assigner = false;
-                            tokens.push({ type, value });
-                            break;
-                        }
-                }
-                continue;
-            }
+			//check for operators
+			if (SPECIAL_CHARACTERS.test(char)) {
+				let value = '';
+				const type = 'operator';
+				while (SPECIAL_CHARACTERS.test(char) && !_.isUndefined(char)) {
+					value += char;
+					char = input[++current];
+				}
+				tokens.push({ type, value });
+				continue;
+			}
+			//declarations must start with a alpha character, however, afterwards it can contain numbers (check the while decl)
+			if (ASSIGNABLE_CHARACTERS.test(char)) {
+				let value = '';
+				while (ASSIGNABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
+					value += char;
+					char = input[++current];
+				}
+				this.log(value);
 
-            this.log(`DEBUG current curser ${current}, last cursor ${input.length} current char ${char}, recursive exit condition is ${exitOn}`);
-            throw new TypeError('unknown var type: ' + char);
-        }
-        return { tokens, current };
-    }
-    maybeBackTickStringCheck(char: string, input: string, current: number) {
-        const BACK_TICK = /`/
-        if (BACK_TICK.test(char)) {
-            let value = "`";
-            char = input[++current];
-            while (!BACK_TICK.test(char)) {
-                value += char;
-                char = input[++current];
-            }
-            value += "`";
-            char = input[++current];
-            return { type: 'stringLiteral', value, current };
-        }
-        return { type: '', value: '' }
-    }
-    stringConditional(condition, char, input, current) {
+				//check name for reserved
+				switch (value) {
+					case "const":
+					case "var":
+					case "let":
+						{
+							this.log("entering ");
+							const results = this.start(input, current, ';');
+							tokens.push({ type: value, value: results.tokens });
+							current = results.current;
+							char = input[++current];
+							break;
+						}
+					default:
+						{
+							let type = (this.assigner) ? 'assignee' : 'name';
+							this.assigner = false;
+							tokens.push({ type, value });
+							break;
+						}
+				}
+				continue;
+			}
 
-        // capture the quotes and the value inside  double/single quotes
-        if (char === condition) {
+			this.log(`DEBUG current curser ${current}, last cursor ${input.length} current char ${char}, recursive exit condition is ${exitOn}`);
+			throw new TypeError('unknown var type: ' + char);
+		}
+		return { tokens, current };
+	}
+	maybeBackTickStringCheck(char: string, input: string, current: number) {
+		const BACK_TICK = /`/
+		if (BACK_TICK.test(char)) {
+			let value = "`";
+			char = input[++current];
+			while (!BACK_TICK.test(char)) {
+				value += char;
+				char = input[++current];
+			}
+			value += "`";
+			char = input[++current];
+			return { type: 'stringLiteral', value, current };
+		}
+		return { type: '', value: '' }
+	}
+	stringConditional(condition, char, input, current) {
 
-            let value = condition;
-            char = input[++current];
-            while (char !== condition) {
-                value += char;
-                char = input[++current];
-            }
-            value += condition;
+		// capture the quotes and the value inside  double/single quotes
+		if (char === condition) {
 
-            char = input[++current];
-            return { type: 'string', value, current };
-        }
-        return { type: '', value: '' }
-    }
+			let value = condition;
+			char = input[++current];
+			while (char !== condition) {
+				value += char;
+				char = input[++current];
+			}
+			value += condition;
+
+			char = input[++current];
+			return { type: 'string', value, current };
+		}
+		return { type: '', value: '' }
+	}
 }
