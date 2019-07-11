@@ -53,6 +53,7 @@ export class Generator {
                 case "const":
                 case "var":
                 case "let":
+				case "import":
                     {
                         return content += `${token.type} ${this.start(token.value)}`;
                     }
