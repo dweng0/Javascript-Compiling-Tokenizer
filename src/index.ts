@@ -1,3 +1,4 @@
+//regex
 const CARRIAGE_RETURN = /\n/;
 const TAB = /\t/;
 const EOL = /\r/;
