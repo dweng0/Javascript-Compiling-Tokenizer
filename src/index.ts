@@ -1,10 +1,10 @@
-import * as _ from 'underscore';
-
 const CARRIAGE_RETURN = /\n/;
 const TAB = /\t/;
 const EOL = /\r/;
 const WHITESPACE = /\s/;
 const ASTRIX = /[*]/
+
+const isEmpty = (arr: Array<any>) => arr ? (arr.length > 0) : true;
 
 /**
  * Any assignable character
@@ -90,7 +90,7 @@ export class LexicalAnalyzer {
 	}
 
 	constructor(options) {
-		if (_.isEmpty(options)) {
+		if (!options) {
 			throw new Error('No options have been provided');
 		}
 
@@ -128,11 +128,11 @@ export class LexicalAnalyzer {
 				break;
 			}
 
-			if (!_.isEmpty(this.thirdPartyParsingTests)) {
+			if (!isEmpty(this.thirdPartyParsingTests)) {
 				this.log(`Enter thirdparty ${char}`);
 				this.thirdPartyParsingTests.forEach(test => {
 					let result = test(char, current, input);
-					if (result && result.payload && (typeof result.payload.type === "string") && !_.isUndefined(result.payload.value)) {
+					if (result && result.payload && (typeof result.payload.type === "string") && result.payload.value !== undefined) {
 						if (!result.currentCursorPosition) {
 							throw new Error('Third party parsing function must return the new cursor position');
 						}
@@ -222,7 +222,8 @@ export class LexicalAnalyzer {
 				current
 			);
 			if (doubleQuotedString.type) {
-				tokens.push(_.pick(doubleQuotedString, 'type', 'value'));
+                const {type, value} = doubleQuotedString;
+				tokens.push({type, value});
 				current = doubleQuotedString.current;
 				char = input[current];
 				this.assigner = false;
@@ -236,8 +237,8 @@ export class LexicalAnalyzer {
 				current
 			);
 			if (singleQuotedString.type) {
-				tokens.push(_.pick(singleQuotedString, 'type', 'value'));
-				current = singleQuotedString.current;
+                const {type, value, current} = singleQuotedString;
+				tokens.push({type, value});
 				char = input[current];
 				this.assigner = false;
 				continue;
@@ -249,8 +250,8 @@ export class LexicalAnalyzer {
 				current
 			);
 			if (backTickString.type) {
-				tokens.push(_.pick(backTickString, 'type', 'value'));
-				current = backTickString.current;
+                const { type, value, current} = backTickString;
+                tokens.push( { type, value});
 				char = input[current];
 				this.assigner = false;
 				continue;
@@ -287,7 +288,7 @@ export class LexicalAnalyzer {
 			//if we have an assignment flag, then push any non whitespace chars into a new token until we reach a whitespace
 			if (this.assigner && ASSIGNABLE_CHARACTERS.test(char)) {
 				let value = '';
-				while (ASSIGNABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
+				while (ASSIGNABLE_CHARACTERS.test(char) && char !== undefined) {
 					value += char;
 					char = input[++current];
 				}
@@ -312,7 +313,7 @@ export class LexicalAnalyzer {
 			//inline comment
 			if (char === "/" && input[current + 1] == "/") {
 				let value = '';
-				while (!isNewLine(char) && !_.isUndefined(char)) {
+				while (!isNewLine(char) && char !== undefined) {
 					value += char;
 					char = input[++current];
 				}
@@ -348,7 +349,7 @@ export class LexicalAnalyzer {
 			if (SPECIAL_CHARACTERS.test(char)) {
 				let value = '';
 				const type = 'operator';
-				while (SPECIAL_CHARACTERS.test(char) && !_.isUndefined(char)) {
+				while (SPECIAL_CHARACTERS.test(char) && char !== undefined) {
 					value += char;
 					char = input[++current];
 				}
@@ -358,7 +359,7 @@ export class LexicalAnalyzer {
 			//declarations must start with a alpha character, however, afterwards it can contain numbers (check the while decl)
 			if (ASSIGNABLE_CHARACTERS.test(char)) {
 				let value = '';
-				while (ASSIGNABLE_CHARACTERS.test(char) && !_.isUndefined(char)) {
+				while (ASSIGNABLE_CHARACTERS.test(char) && char !== undefined) {
 					value += char;
 					char = input[++current];
 				}
